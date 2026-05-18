@@ -27,6 +27,7 @@ describe('ApproveBudgetUseCase', () => {
       budgetRepository as any,
       orderStatusHistoryService as any,
       orderEventPublisher as any,
+      { set: jest.fn(), get: jest.fn(), snapshot: jest.fn() } as any,
     );
 
     const result = await useCase.execute('order-1');
@@ -55,6 +56,7 @@ describe('ApproveBudgetUseCase', () => {
       budgetRepository as any,
       orderStatusHistoryService as any,
       orderEventPublisher as any,
+      { set: jest.fn(), get: jest.fn(), snapshot: jest.fn() } as any,
     );
 
     await expect(useCase.execute('order-404')).rejects.toThrow('Budget not found');

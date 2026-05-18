@@ -20,6 +20,7 @@ describe('OpenOrderUseCase', () => {
       orderRepository as any,
       customerServiceClient as any,
       orderEventPublisher as any,
+      { set: jest.fn(), get: jest.fn(), snapshot: jest.fn() } as any,
     );
 
     const result = await useCase.execute({
@@ -62,6 +63,7 @@ describe('OpenOrderUseCase', () => {
       orderRepository as any,
       customerServiceClient as any,
       orderEventPublisher as any,
+      { set: jest.fn(), get: jest.fn(), snapshot: jest.fn() } as any,
     );
 
     await useCase.execute({
