@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
+import { RequestContextService } from '../../../../../shared/logger/request-context.service';
+import { recordBusinessEvent } from '../../../../../shared/observability/business-events';
 import { OrderStatusHistoryService } from '../../../../order/application/use-cases/_shared/order-status-history.service';
 import { OrderEventPublisher } from '../../../../order/infrastructure/messaging/order-event-publisher';
 import { BudgetOrmEntity } from '../../../infrastructure/persistence/budget.orm-entity';
@@ -13,9 +15,11 @@ export class ApproveBudgetUseCase {
     private readonly budgetRepository: Repository<BudgetOrmEntity>,
     private readonly orderStatusHistoryService: OrderStatusHistoryService,
     private readonly orderEventPublisher: OrderEventPublisher,
+    private readonly requestCtx: RequestContextService,
   ) {}
 
   async execute(orderId: string) {
+    this.requestCtx.set('order_id', orderId);
     const budget = await this.budgetRepository.findOne({ where: { orderId } });
     if (!budget) {
       throw new NotFoundException('Budget not found');
@@ -23,6 +27,7 @@ export class ApproveBudgetUseCase {
 
     budget.status = 'APPROVED';
     budget.respondedAt = new Date();
+    this.requestCtx.set('budget_total_cents', Math.round(Number(budget.finalAmount) * 100));
     await this.budgetRepository.save(budget);
 
     await this.orderStatusHistoryService.transitionStatus({
@@ -48,6 +53,12 @@ export class ApproveBudgetUseCase {
         totalAmount: Number(budget.finalAmount),
         approvedAt: budget.respondedAt,
       },
+    });
+
+    recordBusinessEvent('BudgetApproved', {
+      orderId,
+      totalAmount: Number(budget.finalAmount),
+      finalAmount: Number(budget.finalAmount),
     });
 
     return {

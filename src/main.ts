@@ -1,21 +1,24 @@
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+require('newrelic');
 import 'reflect-metadata';
 import { writeFileSync } from 'fs';
 
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 import { AppModule } from './app.module';
-import { AppLogger } from './infrastructure/observability/logger';
+import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
 import { TracingService } from './infrastructure/observability/tracing.service';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
   const tracingService = app.get(TracingService);
-  const appLogger = app.get(AppLogger);
 
   app.use(tracingService.middleware());
-  app.useLogger(appLogger);
+  app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   app.useGlobalPipes(
     new ValidationPipe({

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { recordBusinessEvent } from '../../../../../infrastructure/observability/new-relic.config';
+import { recordBusinessEvent } from '../../../../../shared/observability/business-events';
 import { OrderStatus } from '../../../domain/value-objects/order-status.vo';
 import { OrderStatusHistoryService } from '../_shared/order-status-history.service';
 

@@ -4,7 +4,8 @@ import { randomUUID } from 'crypto';
 import { Repository } from 'typeorm';
 
 import { CustomerServiceClient } from '../../../../../infrastructure/http-client/customer-service.client';
-import { recordBusinessEvent } from '../../../../../infrastructure/observability/new-relic.config';
+import { RequestContextService } from '../../../../../shared/logger/request-context.service';
+import { recordBusinessEvent } from '../../../../../shared/observability/business-events';
 import { OrderEventPublisher } from '../../../infrastructure/messaging/order-event-publisher';
 import { OrderOrmEntity } from '../../../infrastructure/persistence/order.orm-entity';
 
@@ -27,6 +28,7 @@ export class OpenOrderUseCase {
     private readonly orderRepository: Repository<OrderOrmEntity>,
     private readonly customerServiceClient: CustomerServiceClient,
     private readonly orderEventPublisher: OrderEventPublisher,
+    private readonly requestCtx: RequestContextService,
   ) {}
 
   async execute(input: OpenOrderInput) {
@@ -52,6 +54,9 @@ export class OpenOrderUseCase {
     });
 
     const saved = await this.orderRepository.save(order);
+
+    this.requestCtx.set('order_id', saved.id);
+    this.requestCtx.set('vehicle_plate', saved.vehiclePlate);
 
     await this.orderEventPublisher.publish({
       eventType: 'OS_CREATED',

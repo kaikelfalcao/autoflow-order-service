@@ -2,7 +2,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { connect } from 'amqp-connection-manager';
 import { ConfirmChannel, ConsumeMessage } from 'amqplib';
 
-import { recordSagaCompensation } from '../../../../infrastructure/observability/new-relic.config';
+import { recordSagaCompensation } from '../../../../shared/observability/business-events';
 import { OrderStatusHistoryService } from '../../application/use-cases/_shared/order-status-history.service';
 
 interface PaymentEventPayload {

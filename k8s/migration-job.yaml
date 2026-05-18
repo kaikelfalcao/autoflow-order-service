@@ -1,21 +1,20 @@
+# Roda migrations do order-service (orders, items, status_history, budgets, customers, vehicles).
+# Usa npm run migration:run porque o Dockerfile prod do order-service inclui src/ + node_modules.
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: order-service-migration
-  namespace: order-service
+  name: order-migration
+  namespace: autoflow
 spec:
-  backoffLimit: 1
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 2
   template:
     spec:
       restartPolicy: Never
       containers:
         - name: migration
-          image: your-registry/order-service:latest
-          imagePullPolicy: Always
+          image: kaikelfalcao/autoflow-order:latest
           command: ["npm", "run", "migration:run"]
           envFrom:
-            - configMapRef:
-                name: order-service-config
             - secretRef:
-                name: order-service-secret
-
+                name: order-secrets

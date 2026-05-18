@@ -24,7 +24,7 @@ export class OrderItemOrmEntity {
   @Column({ name: 'item_type', length: 20 })
   itemType: 'SERVICE' | 'PART';
 
-  @Column({ name: 'catalog_item_id', type: 'uuid' })
+  @Column({ name: 'catalog_item_id', type: 'varchar', length: 64 })
   catalogItemId: string;
 
   @Column({ length: 255 })

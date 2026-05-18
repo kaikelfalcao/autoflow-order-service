@@ -357,234 +357,6 @@
         ]
       }
     },
-    "/catalog/services": {
-      "get": {
-        "operationId": "CatalogController_listServices",
-        "parameters": [
-          {
-            "name": "includeInactive",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "summary": "Lista servicos do catalogo",
-        "tags": [
-          "catalog"
-        ]
-      },
-      "post": {
-        "operationId": "CatalogController_createService",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateServiceDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "summary": "Cria servico no catalogo",
-        "tags": [
-          "catalog"
-        ]
-      }
-    },
-    "/catalog/services/{id}": {
-      "put": {
-        "operationId": "CatalogController_updateService",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "summary": "Atualiza servico do catalogo",
-        "tags": [
-          "catalog"
-        ]
-      },
-      "delete": {
-        "operationId": "CatalogController_deactivateService",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "summary": "Desativa servico do catalogo",
-        "tags": [
-          "catalog"
-        ]
-      }
-    },
-    "/catalog/parts": {
-      "get": {
-        "operationId": "CatalogController_listParts",
-        "parameters": [
-          {
-            "name": "includeInactive",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "lowStockOnly",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "summary": "Lista pecas do catalogo",
-        "tags": [
-          "catalog"
-        ]
-      },
-      "post": {
-        "operationId": "CatalogController_createPart",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreatePartDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "summary": "Cria peca no catalogo",
-        "tags": [
-          "catalog"
-        ]
-      }
-    },
-    "/catalog/parts/{id}": {
-      "put": {
-        "operationId": "CatalogController_updatePart",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "summary": "Atualiza peca do catalogo",
-        "tags": [
-          "catalog"
-        ]
-      },
-      "delete": {
-        "operationId": "CatalogController_deactivatePart",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "summary": "Desativa peca do catalogo",
-        "tags": [
-          "catalog"
-        ]
-      }
-    },
-    "/catalog/parts/{id}/stock": {
-      "patch": {
-        "operationId": "CatalogController_adjustStock",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AdjustStockDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "summary": "Ajusta estoque de peca",
-        "tags": [
-          "catalog"
-        ]
-      }
-    },
     "/orders/{id}/execution": {
       "patch": {
         "operationId": "ExecutionController_updateStage",
@@ -642,6 +414,445 @@
           "execution"
         ]
       }
+    },
+    "/customers": {
+      "post": {
+        "operationId": "CustomersController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCustomerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Customer created"
+          },
+          "400": {
+            "description": "Invalid document"
+          },
+          "409": {
+            "description": "Document already registered"
+          }
+        },
+        "summary": "Create a new customer",
+        "tags": [
+          "Customers"
+        ]
+      },
+      "get": {
+        "operationId": "CustomersController_findAll",
+        "parameters": [
+          {
+            "name": "name",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "João",
+              "type": "string"
+            }
+          },
+          {
+            "name": "active",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 20,
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of customers"
+          }
+        },
+        "summary": "List customers with pagination",
+        "tags": [
+          "Customers"
+        ]
+      }
+    },
+    "/customers/by-document/{documentNumber}": {
+      "get": {
+        "operationId": "CustomersController_findByDocument",
+        "parameters": [
+          {
+            "name": "documentNumber",
+            "required": true,
+            "in": "path",
+            "description": "CPF or CNPJ (with or without formatting)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Customer found"
+          },
+          "404": {
+            "description": "Customer not found"
+          }
+        },
+        "summary": "Get customer by document number",
+        "tags": [
+          "Customers"
+        ]
+      }
+    },
+    "/customers/{id}": {
+      "get": {
+        "operationId": "CustomersController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Customer found"
+          },
+          "404": {
+            "description": "Customer not found"
+          }
+        },
+        "summary": "Get customer by ID",
+        "tags": [
+          "Customers"
+        ]
+      },
+      "put": {
+        "operationId": "CustomersController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCustomerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Customer updated"
+          },
+          "404": {
+            "description": "Customer not found"
+          }
+        },
+        "summary": "Update customer contact info",
+        "tags": [
+          "Customers"
+        ]
+      },
+      "delete": {
+        "operationId": "CustomersController_deactivate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Customer deactivated"
+          },
+          "404": {
+            "description": "Customer not found"
+          },
+          "409": {
+            "description": "Customer has active vehicles"
+          }
+        },
+        "summary": "Soft delete customer",
+        "tags": [
+          "Customers"
+        ]
+      }
+    },
+    "/vehicles": {
+      "post": {
+        "operationId": "VehiclesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateVehicleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Vehicle created"
+          },
+          "404": {
+            "description": "Customer not found"
+          },
+          "409": {
+            "description": "Plate already registered"
+          }
+        },
+        "summary": "Register a new vehicle",
+        "tags": [
+          "Vehicles"
+        ]
+      },
+      "get": {
+        "operationId": "VehiclesController_findAll",
+        "parameters": [
+          {
+            "name": "customerId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "active",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of vehicles"
+          }
+        },
+        "summary": "List all vehicles with pagination",
+        "tags": [
+          "Vehicles"
+        ]
+      }
+    },
+    "/vehicles/{id}": {
+      "get": {
+        "operationId": "VehiclesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vehicle found"
+          },
+          "404": {
+            "description": "Vehicle not found"
+          }
+        },
+        "summary": "Get vehicle by ID",
+        "tags": [
+          "Vehicles"
+        ]
+      },
+      "put": {
+        "operationId": "VehiclesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateVehicleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Vehicle updated"
+          },
+          "404": {
+            "description": "Vehicle not found"
+          },
+          "422": {
+            "description": "Invalid mileage"
+          }
+        },
+        "summary": "Update vehicle attributes",
+        "tags": [
+          "Vehicles"
+        ]
+      },
+      "delete": {
+        "operationId": "VehiclesController_deactivate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Vehicle deactivated"
+          },
+          "404": {
+            "description": "Vehicle not found"
+          },
+          "409": {
+            "description": "Vehicle has active orders"
+          }
+        },
+        "summary": "Soft delete vehicle",
+        "tags": [
+          "Vehicles"
+        ]
+      }
+    },
+    "/customers/{customerId}/vehicles": {
+      "get": {
+        "operationId": "VehiclesController_findByCustomer",
+        "parameters": [
+          {
+            "name": "customerId",
+            "required": true,
+            "in": "path",
+            "description": "Customer UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "active",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of vehicles"
+          }
+        },
+        "summary": "List vehicles by customer",
+        "tags": [
+          "Vehicles"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "HealthController_check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Liveness e DB check",
+        "tags": [
+          "health"
+        ]
+      }
     }
   },
   "info": {
@@ -674,21 +885,125 @@
         "type": "object",
         "properties": {}
       },
-      "CreateServiceDto": {
-        "type": "object",
-        "properties": {}
-      },
-      "CreatePartDto": {
-        "type": "object",
-        "properties": {}
-      },
-      "AdjustStockDto": {
-        "type": "object",
-        "properties": {}
-      },
       "UpdateExecutionStageDto": {
         "type": "object",
         "properties": {}
+      },
+      "CreateCustomerDto": {
+        "type": "object",
+        "properties": {
+          "documentType": {
+            "type": "string",
+            "enum": [
+              "CPF",
+              "CNPJ"
+            ],
+            "example": "CPF"
+          },
+          "documentNumber": {
+            "type": "string",
+            "example": "123.456.789-09"
+          },
+          "name": {
+            "type": "string",
+            "example": "João Silva",
+            "minLength": 3
+          },
+          "email": {
+            "type": "string",
+            "example": "joao@email.com"
+          },
+          "phone": {
+            "type": "string",
+            "example": "(11) 99999-9999"
+          }
+        },
+        "required": [
+          "documentType",
+          "documentNumber",
+          "name",
+          "email",
+          "phone"
+        ]
+      },
+      "UpdateCustomerDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "João Silva"
+          },
+          "email": {
+            "type": "string",
+            "example": "joao@email.com"
+          },
+          "phone": {
+            "type": "string",
+            "example": "(11) 99999-9999"
+          }
+        }
+      },
+      "CreateVehicleDto": {
+        "type": "object",
+        "properties": {
+          "customerId": {
+            "type": "string",
+            "example": "uuid-of-customer"
+          },
+          "plate": {
+            "type": "string",
+            "example": "ABC-1234"
+          },
+          "brand": {
+            "type": "string",
+            "example": "Toyota"
+          },
+          "model": {
+            "type": "string",
+            "example": "Corolla"
+          },
+          "year": {
+            "type": "number",
+            "example": 2022
+          },
+          "color": {
+            "type": "string",
+            "example": "White"
+          },
+          "mileageKm": {
+            "type": "number",
+            "example": 15000
+          }
+        },
+        "required": [
+          "customerId",
+          "plate",
+          "brand",
+          "model",
+          "year",
+          "color"
+        ]
+      },
+      "UpdateVehicleDto": {
+        "type": "object",
+        "properties": {
+          "color": {
+            "type": "string",
+            "example": "Black"
+          },
+          "mileageKm": {
+            "type": "number",
+            "example": 20000
+          },
+          "brand": {
+            "type": "string",
+            "example": "Toyota"
+          },
+          "model": {
+            "type": "string",
+            "example": "Corolla Cross"
+          }
+        }
       }
     }
   }

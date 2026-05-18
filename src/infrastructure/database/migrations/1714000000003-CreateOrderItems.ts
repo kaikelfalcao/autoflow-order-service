@@ -7,7 +7,7 @@ export class CreateOrderItems1714000000003 implements MigrationInterface {
         id UUID PRIMARY KEY,
         order_id UUID NOT NULL,
         item_type VARCHAR(20) NOT NULL,
-        catalog_item_id UUID NOT NULL,
+        catalog_item_id VARCHAR(64) NOT NULL,
         name VARCHAR(255) NOT NULL,
         unit_price NUMERIC(10,2) NOT NULL,
         quantity INT NOT NULL DEFAULT 1,

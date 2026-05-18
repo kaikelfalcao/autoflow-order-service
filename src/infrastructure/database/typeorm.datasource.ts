@@ -9,11 +9,12 @@ const AppDataSource = new DataSource({
   password: process.env.DATABASE_PASSWORD || 'order_service',
   database: process.env.DATABASE_NAME || 'order_service',
   // Mantem configuracao simples: o TypeORM resolve entidades/migrations automaticamente.
-  entities: ['src/modules/**/infrastructure/persistence/*.orm-entity.ts'],
+  entities: [
+    'src/modules/**/infrastructure/persistence/*.orm-entity.ts',
+  ],
   migrations: ['src/infrastructure/database/migrations/*.ts'],
   synchronize: false,
   logging: false,
 });
 
 export default AppDataSource;
-

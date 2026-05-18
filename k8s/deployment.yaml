@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: order-service
-  namespace: order-service
+  namespace: autoflow
   labels:
     app: order-service
 spec:
@@ -17,30 +17,31 @@ spec:
     spec:
       containers:
         - name: order-service
-          image: your-registry/order-service:latest
+          image: kaikelfalcao/autoflow-order:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 3001
           envFrom:
-            - configMapRef:
-                name: order-service-config
             - secretRef:
-                name: order-service-secret
+                name: order-secrets
           resources:
             requests:
-              cpu: "200m"
-              memory: "256Mi"
+              cpu: 200m
+              memory: 256Mi
             limits:
-              cpu: "500m"
-              memory: "512Mi"
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            failureThreshold: 3
           readinessProbe:
-            tcpSocket:
+            httpGet:
+              path: /health
               port: 3001
             initialDelaySeconds: 10
             periodSeconds: 10
-          livenessProbe:
-            tcpSocket:
-              port: 3001
-            initialDelaySeconds: 20
-            periodSeconds: 15
-
+            failureThreshold: 3

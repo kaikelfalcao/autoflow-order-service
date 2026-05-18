@@ -1,4 +1,4 @@
-import { IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength, Min } from 'class-validator';
+import { IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, Min } from 'class-validator';
 
 export enum OrderItemTypeDtoEnum {
   SERVICE = 'SERVICE',
@@ -9,7 +9,8 @@ export class AddItemDto {
   @IsEnum(OrderItemTypeDtoEnum)
   itemType: OrderItemTypeDtoEnum;
 
-  @IsUUID()
+  @IsString()
+  @IsNotEmpty()
   catalogItemId: string;
 
   @IsString()
@@ -17,7 +18,7 @@ export class AddItemDto {
   @MaxLength(255)
   name: string;
 
-  @IsInt()
+  @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
   unitPrice: number;
 
@@ -26,4 +27,3 @@ export class AddItemDto {
   @Min(1)
   quantity?: number;
 }
-

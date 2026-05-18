@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { recordBusinessEvent } from '../../../../../infrastructure/observability/new-relic.config';
+import { recordBusinessEvent } from '../../../../../shared/observability/business-events';
 import { OrderStatusHistoryService } from '../../../../order/application/use-cases/_shared/order-status-history.service';
 import { OrderEventPublisher } from '../../../../order/infrastructure/messaging/order-event-publisher';
 import { OrderItemOrmEntity } from '../../../../order/infrastructure/persistence/order-item.orm-entity';

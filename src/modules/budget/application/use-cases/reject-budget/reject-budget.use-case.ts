@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { recordSagaCompensation } from '../../../../../infrastructure/observability/new-relic.config';
+import { recordSagaCompensation } from '../../../../../shared/observability/business-events';
 import { OrderStatusHistoryService } from '../../../../order/application/use-cases/_shared/order-status-history.service';
 import { OrderEventPublisher } from '../../../../order/infrastructure/messaging/order-event-publisher';
 import { BudgetOrmEntity } from '../../../infrastructure/persistence/budget.orm-entity';
