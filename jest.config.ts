@@ -17,13 +17,12 @@ const config: Config = {
     'src/modules/execution/application/use-cases/complete-execution/complete-execution.use-case.ts',
     'src/modules/execution/application/use-cases/get-execution-queue/get-execution-queue.use-case.ts',
   ],
-  // TODO: subir threshold para 80/80/80/80 quando approve-budget e open-order tiverem testes
   coverageThreshold: {
     global: {
-      lines: 65,
-      branches: 70,
-      functions: 70,
-      statements: 65,
+      lines: 80,
+      branches: 80,
+      functions: 80,
+      statements: 80,
     },
   },
 };

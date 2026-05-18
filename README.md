@@ -1,126 +1,203 @@
-# Order Service
+# autoflow-order-service
 
-Microservico responsavel pelo ciclo de vida de Ordem de Servico (OS), catalogo, budget e fila de execucao.
+> Microsserviço **núcleo** do ecossistema **autoflow** (FIAP Tech Challenge — Fase 4). Mantém o ciclo de vida da Ordem de Serviço (OS), do cliente e do veículo, além de orçamentos e fila de execução.
 
-## Arquitetura
+Cinco subdomínios em um mesmo serviço:
 
-- Estilo: microsservicos com comunicacao sincrona (REST) e assincrona (RabbitMQ).
-- Banco: PostgreSQL.
-- Mensageria: RabbitMQ com topico `order.events` para publicacao e `payment.events` para consumo.
-- Referencias: `architecture-reference.md` e `plano_order_service_fase4.md`.
+- **Order** — OS com state machine (`RECEIVED` → `IN_DIAGNOSIS` → `WAITING_APPROVAL` → `IN_EXECUTION` → `READY` → `DELIVERED`/`CANCELLED`).
+- **Budget** — orçamentos vinculados à OS (gerar → aprovar/rejeitar).
+- **Execution** — fila de OS em execução para o time da oficina.
+- **Customer** — cadastro do cliente (fonte de verdade; consumido por outros serviços via HTTP).
+- **Vehicle** — veículos vinculados ao cliente.
 
-## Responsabilidades
+---
 
-- Abrir e atualizar OS com historico de status.
-- Gerenciar catalogo de servicos e pecas.
-- Gerar, aprovar e rejeitar budget.
-- Manter fila de execucao por prioridade.
-- Publicar eventos para os demais servicos.
+## 🧱 Stack
 
-## Ciclo de vida da OS
+| Camada       | Tecnologia                                          |
+|--------------|-----------------------------------------------------|
+| Runtime      | Node.js 24 (LTS)                                    |
+| Linguagem    | TypeScript (strict)                                 |
+| Framework    | NestJS 11                                           |
+| Banco        | PostgreSQL 16 (TypeORM + migrations)                |
+| Mensageria   | RabbitMQ via `amqp-connection-manager`              |
+| Resiliência  | opossum (HTTP client p/ identity-service)           |
+| Observ.      | New Relic APM + canonical logs (Winston)            |
+| Testes       | Jest + Cucumber (BDD)                               |
+| Container    | Docker multi-stage                                  |
+| Deploy       | EKS via GitHub Actions                              |
 
-`RECEIVED -> DIAGNOSIS -> AWAITING_APPROVAL -> APPROVED -> IN_EXECUTION -> COMPLETED -> AWAITING_PAYMENT -> PAID -> DELIVERED`
+Lint via `tsc --noEmit` (sem ESLint configurado neste repo).
 
-Fluxos de compensacao:
+---
 
-- `AWAITING_APPROVAL -> REJECTED -> CANCELLED`
-- `AWAITING_PAYMENT -> PAYMENT_FAILED -> AWAITING_PAYMENT`
+## 🏛️ Arquitetura
 
-## Saga Pattern
+**Hexagonal por feature**. Cada subdomínio em `src/modules/<feature>/` tem sua própria pirâmide `domain → application → infrastructure → presentation`.
 
-- Estrategia: **Coreografada**.
-- Justificativa: reduz acoplamento, distribui responsabilidade de reacao por evento entre servicos.
-- Pontos principais:
-  - OS publica eventos de negocio (`OS_CREATED`, `BUDGET_GENERATED`, `PAYMENT_REQUESTED`, etc.).
-  - Reage a eventos de pagamento (`PAYMENT_CONFIRMED`, `PAYMENT_FAILED`, `PAYMENT_REFUNDED`).
+```
+src/
+├── modules/
+│   ├── order/        ← OS, state machine, eventos de domínio
+│   │   ├── domain/                ← entities, value-objects (OrderStatus)
+│   │   ├── application/use-cases  ← open-order, update-status, cancel-order…
+│   │   ├── infrastructure/
+│   │   │   ├── persistence/       ← TypeORM repo + mapper
+│   │   │   └── messaging/         ← order-event-publisher, payment-event-consumer, saga/
+│   │   └── presentation/http/     ← OrderController + DTOs
+│   ├── budget/       ← orçamentos
+│   ├── execution/    ← fila + complete-execution
+│   ├── customers/    ← cadastro de cliente (fonte de verdade do CPF)
+│   └── vehicles/     ← veículos do cliente
+├── infrastructure/
+│   ├── config/, database/, http/, http-client/, messaging/, observability/
+├── health/
+└── shared/           ← filters, logger, middlewares
+```
 
-## Eventos publicados e consumidos
+---
 
-Publicados:
+## 🌐 Endpoints REST (via Kong)
 
-- `OS_CREATED` (`order.created`)
-- `OS_STATUS_CHANGED` (`order.status.changed`)
-- `BUDGET_GENERATED` (`order.budget.generated`)
-- `BUDGET_APPROVED` (`order.budget.approved`)
-- `BUDGET_REJECTED` (`order.budget.rejected`)
-- `EXECUTION_COMPLETED` (`order.execution.completed`)
-- `PAYMENT_REQUESTED` (`order.payment.requested`)
-- `OS_CANCELLED` (`order.cancelled`)
+### Orders — `/orders/*`
+| Método | Path                    | Descrição                                  |
+|--------|-------------------------|--------------------------------------------|
+| POST   | `/orders`               | Abrir OS                                   |
+| GET    | `/orders`               | Listar OSs                                 |
+| GET    | `/orders/queue`         | Fila operacional                           |
+| GET    | `/orders/:id`           | Detalhe da OS                              |
+| GET    | `/orders/:id/history`   | Histórico de transições                    |
+| PATCH  | `/orders/:id/status`    | Transição manual de status                 |
+| POST   | `/orders/:id/items`     | Adicionar item (peça/serviço) à OS         |
+| DELETE | `/orders/:id/items/:itemId` | Remover item                           |
+| PATCH  | `/orders/:id/cancel`    | Cancelar OS                                |
 
-Consumidos (payment.events):
+### Budgets — `/budgets/*`
+| Método | Path                | Descrição                                       |
+|--------|---------------------|-------------------------------------------------|
+| POST   | `/budgets`          | Gerar orçamento para uma OS                     |
+| GET    | `/budgets`          | Listar/consultar orçamentos                     |
+| POST   | `/budgets/approve`  | Aprovar (publica `order.budget.approved` e `order.payment.requested`) |
+| POST   | `/budgets/reject`   | Rejeitar (publica `order.budget.rejected`)      |
 
-- `PAYMENT_CONFIRMED`
-- `PAYMENT_FAILED`
-- `PAYMENT_REFUNDED`
+### Execution — `/execution/*`
+| Método | Path                            | Descrição                          |
+|--------|---------------------------------|------------------------------------|
+| GET    | `/execution/queue`              | OS em execução                     |
+| PATCH  | `/execution/:id/execution`      | Iniciar execução                   |
+| POST   | `/execution/:id/execution/complete` | Concluir execução              |
 
-## Como rodar localmente
+### Customers — `/customers/*`
+| Método | Path                                       | Descrição                          |
+|--------|--------------------------------------------|------------------------------------|
+| POST   | `/customers`                               | Cadastrar cliente                  |
+| GET    | `/customers`                               | Listagem                           |
+| GET    | `/customers/by-document/:documentNumber`   | Lookup por CPF (consumido pelo identity) |
+| GET    | `/customers/:id`                           | Detalhe                            |
+| PUT    | `/customers/:id`                           | Atualizar                          |
+| DELETE | `/customers/:id`                           | Remover                            |
+
+### Vehicles — `/vehicles/*` & `/customers/:id/vehicles`
+| Método | Path                                       | Descrição                          |
+|--------|--------------------------------------------|------------------------------------|
+| POST   | `/vehicles`                                | Cadastrar veículo                  |
+| GET    | `/vehicles`                                | Listagem                           |
+| GET    | `/vehicles/:id`                            | Detalhe                            |
+| GET    | `/customers/:customerId/vehicles`          | Veículos de um cliente             |
+| PUT    | `/vehicles/:id`                            | Atualizar                          |
+| DELETE | `/vehicles/:id`                            | Remover                            |
+
+---
+
+## 📬 Eventos RabbitMQ
+
+### Publicados — exchange `order.events` (topic, durable)
+
+| Routing key                       | Quando                                       |
+|-----------------------------------|----------------------------------------------|
+| `order.created`                   | OS aberta                                    |
+| `order.status.changed`            | Mudança de status                            |
+| `order.budget.generated`          | Orçamento gerado                             |
+| `order.budget.approved`           | Cliente aprovou (consumido pelo saga)        |
+| `order.budget.rejected`           | Cliente rejeitou                             |
+| `order.execution.completed`       | Execução finalizada (consumido pelo saga)    |
+| `order.payment.requested`         | Acompanha approved (consumido pelo billing)  |
+| `order.cancelled`                 | OS cancelada                                 |
+
+### Consumidos — exchange `payment.events`
+
+| Queue                              | Binding (routing key)    | Efeito                                |
+|------------------------------------|--------------------------|---------------------------------------|
+| `order.payment.confirmed`          | `payment.confirmed`      | Promove OS para `IN_EXECUTION`        |
+| `order.payment.failed`             | `payment.failed`         | Cancela a OS                          |
+| `order.payment.refunded`           | `payment.refunded`       | Marca pagamento como estornado        |
+
+---
+
+## 🔧 Variáveis de ambiente
+
+| Variável              | Default                          | Descrição                            |
+|-----------------------|----------------------------------|--------------------------------------|
+| `PORT`                | `3001`                           | porta HTTP                            |
+| `DATABASE_HOST`       | `localhost`                      |                                      |
+| `DATABASE_PORT`       | `5432`                           |                                      |
+| `DATABASE_USER`       | `order_service`                  |                                      |
+| `DATABASE_PASSWORD`   | —                                |                                      |
+| `DATABASE_NAME`       | `order_service`                  |                                      |
+| `RABBITMQ_URL`        | `amqp://localhost:5672`          |                                      |
+| `IDENTITY_SERVICE_URL`| `http://localhost:3000`          | usado para validar JWT externamente   |
+| `JWT_SECRET`          | —                                | mesmo segredo do identity (validação) |
+| `NEW_RELIC_LICENSE_KEY` | —                              | (opcional) APM                        |
+
+---
+
+## 🚀 Rodar localmente
 
 ```bash
 npm install
-npm run db:up
-DATABASE_HOST=localhost DATABASE_PORT=5433 DATABASE_USER=order_service DATABASE_PASSWORD=order_service DATABASE_NAME=order_service npm run migration:run
-npm run start
+npm run db:up                # docker-compose Postgres
+npm run migration:run
+npm run start:dev
 ```
 
-## Como rodar os testes
+Integração completa: `cd ../autoflow-infra/local && ./bootstrap.sh`.
+
+---
+
+## 🧪 Testes
 
 ```bash
-npm run test -- --runInBand
-npm run test:cov
-npm run test:bdd
+npm run test           # unit
+npm run test:cov       # threshold 80% global
+npm run test:bdd       # Cucumber (test/bdd/features)
+npm run lint           # tsc --noEmit
 ```
 
-## Evidencias de cobertura
+**Coverage:** 100% nos use-cases monitorados pelo `collectCoverageFrom` (open-order, update-status, generate/approve/reject-budget, complete-execution, get-execution-queue).
 
-- Cobertura validada localmente via `npm run test:cov`.
-- Threshold global configurado no `jest.config.ts`.
+> **TODO:** SonarQube Community.
 
-## Evidencias de pipeline CI/CD
+---
 
-- Workflow: `.github/workflows/ci-cd.yml`.
-- Jobs: build/test, build de imagem e deploy (main).
+## 🐳 Docker / ☸️ Deploy
 
-## Link do Swagger
+| Workflow | Trigger                          | Jobs                              |
+|----------|----------------------------------|-----------------------------------|
+| `ci.yml` | push/PR em qualquer branch       | lint + build + test:cov + bdd     |
+| `cd.yml` | `workflow_run` (CI ok em `main`) | DockerHub build & push + EKS rollout |
 
-- UI: `http://localhost:3001/docs`
-- Spec JSON: `swagger.json` (gerado no bootstrap da aplicacao).
+Imagem: `kaikelfalcao/autoflow-order:<sha>`. Cluster `autoflow-dev-eks` / namespace `autoflow`.
 
-## Tecnologias utilizadas
+---
 
-- NestJS
-- TypeORM
-- PostgreSQL
-- RabbitMQ
-- Jest
-- Cucumber
-- Docker
-- Kubernetes
+## 📊 Observabilidade
 
-## Docker
+- Logs canônicos por request HTTP **e** por evento RabbitMQ processado.
+- Circuit breaker (`opossum`) para chamadas ao `identity-service`; emite `OrderServiceCircuitOpen` no New Relic.
+- Custom events: `OrderCreated`, `BudgetApproved`, `BudgetRejected`, `OrderStatusChanged`.
 
-```bash
-docker build -t order-service:local .
-docker run --rm -p 3001:3001 \
-  -e DATABASE_HOST=host.docker.internal \
-  -e DATABASE_PORT=5433 \
-  -e DATABASE_USER=order_service \
-  -e DATABASE_PASSWORD=order_service \
-  -e DATABASE_NAME=order_service \
-  -e RABBITMQ_URL=amqp://guest:guest@host.docker.internal:5672 \
-  -e CUSTOMER_SERVICE_URL=http://host.docker.internal:3002 \
-  -e ENABLE_NEW_RELIC=false \
-  order-service:local
-```
+---
 
-## Kubernetes (manifests)
+## 🔗 Ecossistema
 
-```bash
-kubectl apply -f k8s/namespace.yaml
-kubectl apply -f k8s/configmap.yaml
-kubectl apply -f k8s/secret.yaml
-kubectl apply -f k8s/deployment.yaml
-kubectl apply -f k8s/service.yaml
-kubectl apply -f k8s/hpa.yaml
-kubectl apply -f k8s/migration-job.yaml
-```
-
+[`autoflow-infra`](https://github.com/kaikelfalcao/autoflow-infra) · [`autoflow-identity-service`](https://github.com/kaikelfalcao/autoflow-identity-service) · [`autoflow-catalog-service`](https://github.com/kaikelfalcao/autoflow-catalog-service) · [`autoflow-payment-service`](https://github.com/kaikelfalcao/autoflow-payment-service) · [`autoflow-saga-orchestrator`](https://github.com/kaikelfalcao/autoflow-saga-orchestrator) · [`autoflow-notification-service`](https://github.com/kaikelfalcao/autoflow-notification-service)
