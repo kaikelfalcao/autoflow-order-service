@@ -1,7 +1,7 @@
-import { HttpService } from '@nestjs/axios';
-import { Injectable, ServiceUnavailableException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import CircuitBreaker from 'opossum';
+import { HttpService } from "@nestjs/axios";
+import { Injectable, ServiceUnavailableException } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import CircuitBreaker from "opossum";
 
 interface CustomerProfileResponse {
   customerId: string;
@@ -28,9 +28,12 @@ export class CustomerServiceClient {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
   ) {
-    this.baseUrl = this.configService.get<string>('customerService.url') || '';
-    this.timeoutMs = this.configService.get<number>('customerService.timeout', 3000);
-    this.retries = this.configService.get<number>('customerService.retries', 1);
+    this.baseUrl = this.configService.get<string>("customerService.url") || "";
+    this.timeoutMs = this.configService.get<number>(
+      "customerService.timeout",
+      3000,
+    );
+    this.retries = this.configService.get<number>("customerService.retries", 1);
 
     this.breaker = new CircuitBreaker(this.fetchProfile.bind(this), {
       timeout: this.timeoutMs,
@@ -48,7 +51,7 @@ export class CustomerServiceClient {
   async getCustomerProfile(cpf: string): Promise<CustomerProfileResponse> {
     if (!this.isEnabled()) {
       throw new ServiceUnavailableException(
-        'Customer Service URL is not configured',
+        "Customer Service URL is not configured",
       );
     }
 
@@ -56,7 +59,7 @@ export class CustomerServiceClient {
       return await this.breaker.fire(cpf);
     } catch {
       throw new ServiceUnavailableException(
-        'servico temporariamente indisponivel',
+        "servico temporariamente indisponivel",
       );
     }
   }
@@ -69,12 +72,13 @@ export class CustomerServiceClient {
 
     for (let attempt = 1; attempt <= attempts; attempt += 1) {
       try {
-        const response = await this.httpService.axiosRef.get<CustomerProfileResponse>(
-          endpoint,
-          {
-            timeout: this.timeoutMs,
-          },
-        );
+        const response =
+          await this.httpService.axiosRef.get<CustomerProfileResponse>(
+            endpoint,
+            {
+              timeout: this.timeoutMs,
+            },
+          );
 
         return response.data;
       } catch (error) {
@@ -88,4 +92,3 @@ export class CustomerServiceClient {
     throw lastError;
   }
 }
-

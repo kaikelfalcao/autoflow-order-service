@@ -1,5 +1,5 @@
-import { CustomerTypeormEntity } from './customer.orm-entity';
-import { Customer } from '../../domain/customer.entity';
+import { CustomerTypeormEntity } from "./customer.orm-entity";
+import { Customer } from "../../domain/customer.entity";
 
 export class CustomerMapper {
   static toDomain(entity: CustomerTypeormEntity): Customer {

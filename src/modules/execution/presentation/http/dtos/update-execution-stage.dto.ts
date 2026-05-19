@@ -1,8 +1,8 @@
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsString } from "class-validator";
 
 export enum ExecutionStageDtoEnum {
-  IN_EXECUTION = 'IN_EXECUTION',
-  COMPLETED = 'COMPLETED',
+  IN_EXECUTION = "IN_EXECUTION",
+  COMPLETED = "COMPLETED",
 }
 
 export class UpdateExecutionStageDto {
@@ -13,4 +13,3 @@ export class UpdateExecutionStageDto {
   @IsString()
   notes?: string;
 }
-

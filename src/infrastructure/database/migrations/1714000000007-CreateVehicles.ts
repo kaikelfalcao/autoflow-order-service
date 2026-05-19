@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import { MigrationInterface, QueryRunner } from "typeorm";
 
 export class CreateVehicles1714000000007 implements MigrationInterface {
   async up(queryRunner: QueryRunner): Promise<void> {
@@ -18,9 +18,15 @@ export class CreateVehicles1714000000007 implements MigrationInterface {
         CONSTRAINT vehicles_plate_unique UNIQUE (plate)
       )
     `);
-    await queryRunner.query(`CREATE INDEX idx_vehicles_customer_id ON vehicles (customer_id)`);
-    await queryRunner.query(`CREATE INDEX idx_vehicles_plate ON vehicles (plate)`);
-    await queryRunner.query(`CREATE INDEX idx_vehicles_active ON vehicles (active)`);
+    await queryRunner.query(
+      `CREATE INDEX idx_vehicles_customer_id ON vehicles (customer_id)`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX idx_vehicles_plate ON vehicles (plate)`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX idx_vehicles_active ON vehicles (active)`,
+    );
   }
 
   async down(queryRunner: QueryRunner): Promise<void> {

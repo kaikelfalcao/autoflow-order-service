@@ -1,8 +1,8 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { ApiPropertyOptional } from "@nestjs/swagger";
+import { IsInt, IsOptional, IsString, Min } from "class-validator";
 
 export class UpdateVehicleDto {
-  @ApiPropertyOptional({ example: 'Black' })
+  @ApiPropertyOptional({ example: "Black" })
   @IsString()
   @IsOptional()
   color?: string;
@@ -13,12 +13,12 @@ export class UpdateVehicleDto {
   @IsOptional()
   mileageKm?: number;
 
-  @ApiPropertyOptional({ example: 'Toyota' })
+  @ApiPropertyOptional({ example: "Toyota" })
   @IsString()
   @IsOptional()
   brand?: string;
 
-  @ApiPropertyOptional({ example: 'Corolla Cross' })
+  @ApiPropertyOptional({ example: "Corolla Cross" })
   @IsString()
   @IsOptional()
   model?: string;

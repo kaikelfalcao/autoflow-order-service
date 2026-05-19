@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
 
-import { OrderOrmEntity } from '../../../../order/infrastructure/persistence/order.orm-entity';
-import { toOrderOutput } from '../../../../order/application/use-cases/_shared/order-output.mapper';
+import { OrderOrmEntity } from "../../../../order/infrastructure/persistence/order.orm-entity";
+import { toOrderOutput } from "../../../../order/application/use-cases/_shared/order-output.mapper";
 
 @Injectable()
 export class GetExecutionQueueUseCase {
@@ -14,9 +14,14 @@ export class GetExecutionQueueUseCase {
 
   async execute() {
     const orders = await this.orderRepository
-      .createQueryBuilder('orders')
-      .where('orders.status IN (:...statuses)', {
-        statuses: ['IN_EXECUTION', 'AWAITING_APPROVAL', 'DIAGNOSIS', 'RECEIVED'],
+      .createQueryBuilder("orders")
+      .where("orders.status IN (:...statuses)", {
+        statuses: [
+          "IN_EXECUTION",
+          "AWAITING_APPROVAL",
+          "DIAGNOSIS",
+          "RECEIVED",
+        ],
       })
       .orderBy(
         `CASE
@@ -26,12 +31,11 @@ export class GetExecutionQueueUseCase {
            WHEN orders.status = 'RECEIVED' THEN 4
            ELSE 5
          END`,
-        'ASC',
+        "ASC",
       )
-      .addOrderBy('orders.created_at', 'ASC')
+      .addOrderBy("orders.created_at", "ASC")
       .getMany();
 
     return orders.map(toOrderOutput);
   }
 }
-

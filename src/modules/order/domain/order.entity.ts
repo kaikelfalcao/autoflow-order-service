@@ -1,9 +1,9 @@
-import { OrderId } from './value-objects/order-id.vo';
-import { OrderItem } from './value-objects/order-item.vo';
+import { OrderId } from "./value-objects/order-id.vo";
+import { OrderItem } from "./value-objects/order-item.vo";
 import {
   OrderStatus,
   assertValidTransition,
-} from './value-objects/order-status.vo';
+} from "./value-objects/order-status.vo";
 
 export interface CreateOrderProps {
   id?: string;
@@ -31,7 +31,7 @@ export interface RestoreOrderProps {
   status: OrderStatus;
   items: Array<{
     itemId: string;
-    type: 'SERVICE' | 'PART';
+    type: "SERVICE" | "PART";
     name: string;
     unitPrice: number;
     quantity: number;
@@ -62,7 +62,7 @@ export class Order {
   static create(props: CreateOrderProps): Order {
     const now = new Date();
     return new Order(
-      props.id ? OrderId.fromString(props.id) : (OrderId.generate() as OrderId),
+      props.id ? OrderId.fromString(props.id) : OrderId.generate(),
       props.customerCpf,
       props.customerName,
       props.customerPhone,
@@ -71,7 +71,7 @@ export class Order {
       props.vehicleModel,
       props.vehicleYear,
       props.branchId,
-      'RECEIVED',
+      "RECEIVED",
       [],
       props.notes ?? null,
       now,
@@ -81,7 +81,7 @@ export class Order {
 
   static restore(props: RestoreOrderProps): Order {
     return new Order(
-      OrderId.fromString(props.id) as OrderId,
+      OrderId.fromString(props.id),
       props.customerCpf,
       props.customerName,
       props.customerPhone,

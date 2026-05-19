@@ -1,11 +1,14 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { VehicleRepository, VehicleFilters } from '../../domain/ports/vehicle.repository';
-import { Vehicle } from '../../domain/vehicle.entity';
-import { VehicleTypeormEntity } from './vehicle.orm-entity';
-import { VehicleMapper } from './vehicle.mapper';
-import { OrderOrmEntity } from '../../../order/infrastructure/persistence/order.orm-entity';
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import {
+  VehicleRepository,
+  VehicleFilters,
+} from "../../domain/ports/vehicle.repository";
+import { Vehicle } from "../../domain/vehicle.entity";
+import { VehicleTypeormEntity } from "./vehicle.orm-entity";
+import { VehicleMapper } from "./vehicle.mapper";
+import { OrderOrmEntity } from "../../../order/infrastructure/persistence/order.orm-entity";
 
 @Injectable()
 export class VehicleRepositoryImpl implements VehicleRepository {
@@ -26,22 +29,37 @@ export class VehicleRepositoryImpl implements VehicleRepository {
     return entity ? VehicleMapper.toDomain(entity) : null;
   }
 
-  async findByCustomerId(customerId: string, filters: VehicleFilters): Promise<{ data: Vehicle[]; total: number }> {
+  async findByCustomerId(
+    customerId: string,
+    filters: VehicleFilters,
+  ): Promise<{ data: Vehicle[]; total: number }> {
     const limit = Math.min(filters.limit, 100);
     const skip = (filters.page - 1) * limit;
     const where: Record<string, unknown> = { customerId };
     if (filters.active !== undefined) where.active = filters.active;
-    const [entities, total] = await this.repo.findAndCount({ where, order: { createdAt: 'DESC' }, take: limit, skip });
+    const [entities, total] = await this.repo.findAndCount({
+      where,
+      order: { createdAt: "DESC" },
+      take: limit,
+      skip,
+    });
     return { data: entities.map(VehicleMapper.toDomain), total };
   }
 
-  async findAll(filters: VehicleFilters): Promise<{ data: Vehicle[]; total: number }> {
+  async findAll(
+    filters: VehicleFilters,
+  ): Promise<{ data: Vehicle[]; total: number }> {
     const limit = Math.min(filters.limit, 100);
     const skip = (filters.page - 1) * limit;
     const where: Record<string, unknown> = {};
     if (filters.customerId) where.customerId = filters.customerId;
     if (filters.active !== undefined) where.active = filters.active;
-    const [entities, total] = await this.repo.findAndCount({ where, order: { createdAt: 'DESC' }, take: limit, skip });
+    const [entities, total] = await this.repo.findAndCount({
+      where,
+      order: { createdAt: "DESC" },
+      take: limit,
+      skip,
+    });
     return { data: entities.map(VehicleMapper.toDomain), total };
   }
 
@@ -58,10 +76,19 @@ export class VehicleRepositoryImpl implements VehicleRepository {
   async hasActiveOrders(vehicleId: string): Promise<boolean> {
     const vehicle = await this.repo.findOne({ where: { id: vehicleId } });
     if (!vehicle) return false;
-    const terminalStatuses = ['COMPLETED', 'PAID', 'DELIVERED', 'CANCELLED', 'REJECTED'];
-    const count = await this.orderRepo.createQueryBuilder('order')
-      .where('order.vehiclePlate = :plate', { plate: vehicle.plate })
-      .andWhere('order.status NOT IN (:...statuses)', { statuses: terminalStatuses })
+    const terminalStatuses = [
+      "COMPLETED",
+      "PAID",
+      "DELIVERED",
+      "CANCELLED",
+      "REJECTED",
+    ];
+    const count = await this.orderRepo
+      .createQueryBuilder("order")
+      .where("order.vehiclePlate = :plate", { plate: vehicle.plate })
+      .andWhere("order.status NOT IN (:...statuses)", {
+        statuses: terminalStatuses,
+      })
       .getCount();
     return count > 0;
   }

@@ -1,9 +1,9 @@
-import { CancelOrderUseCase } from '../../../src/modules/order/application/use-cases/cancel-order/cancel-order.use-case';
+import { CancelOrderUseCase } from "../../../src/modules/order/application/use-cases/cancel-order/cancel-order.use-case";
 
-describe('CancelOrderUseCase', () => {
-  const makeOrderStatusHistoryService = (status = 'CANCELLED') => ({
+describe("CancelOrderUseCase", () => {
+  const makeOrderStatusHistoryService = (status = "CANCELLED") => ({
     transitionStatus: jest.fn(async () => ({
-      id: 'order-1',
+      id: "order-1",
       status,
       updatedAt: new Date(),
     })),
@@ -13,7 +13,7 @@ describe('CancelOrderUseCase', () => {
     publish: jest.fn(async () => undefined),
   });
 
-  it('cancels order and publishes OS_CANCELLED event', async () => {
+  it("cancels order and publishes OS_CANCELLED event", async () => {
     const orderStatusHistoryService = makeOrderStatusHistoryService();
     const orderEventPublisher = makeEventPublisher();
 
@@ -24,22 +24,22 @@ describe('CancelOrderUseCase', () => {
     );
 
     const result = await useCase.execute({
-      orderId: 'order-1',
-      changedBy: 'api:user',
-      reason: 'Customer requested cancellation',
+      orderId: "order-1",
+      changedBy: "api:user",
+      reason: "Customer requested cancellation",
     });
 
-    expect(result.status).toBe('CANCELLED');
+    expect(result.status).toBe("CANCELLED");
     expect(orderEventPublisher.publish).toHaveBeenCalledWith(
       expect.objectContaining({
-        eventType: 'OS_CANCELLED',
-        routingKey: 'order.cancelled',
-        correlationId: 'order-1',
+        eventType: "OS_CANCELLED",
+        routingKey: "order.cancelled",
+        correlationId: "order-1",
       }),
     );
   });
 
-  it('uses defaults when changedBy and reason are not provided', async () => {
+  it("uses defaults when changedBy and reason are not provided", async () => {
     const orderStatusHistoryService = makeOrderStatusHistoryService();
     const orderEventPublisher = makeEventPublisher();
 
@@ -49,19 +49,18 @@ describe('CancelOrderUseCase', () => {
       { set: jest.fn(), get: jest.fn(), snapshot: jest.fn() } as any,
     );
 
-    await useCase.execute({ orderId: 'order-2' });
+    await useCase.execute({ orderId: "order-2" });
 
     expect(orderStatusHistoryService.transitionStatus).toHaveBeenCalledWith(
       expect.objectContaining({
-        changedBy: 'api:user',
-        reason: 'Cancelled by request',
+        changedBy: "api:user",
+        reason: "Cancelled by request",
       }),
     );
     expect(orderEventPublisher.publish).toHaveBeenCalledWith(
       expect.objectContaining({
-        payload: expect.objectContaining({ reason: 'Cancelled by request' }),
+        payload: expect.objectContaining({ reason: "Cancelled by request" }),
       }),
     );
   });
 });
-

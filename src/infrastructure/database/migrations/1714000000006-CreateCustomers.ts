@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import { MigrationInterface, QueryRunner } from "typeorm";
 
 export class CreateCustomers1714000000006 implements MigrationInterface {
   async up(queryRunner: QueryRunner): Promise<void> {
@@ -16,8 +16,12 @@ export class CreateCustomers1714000000006 implements MigrationInterface {
         CONSTRAINT customers_document_number_unique UNIQUE (document_number)
       )
     `);
-    await queryRunner.query(`CREATE INDEX idx_customers_document ON customers (document_number)`);
-    await queryRunner.query(`CREATE INDEX idx_customers_active ON customers (active)`);
+    await queryRunner.query(
+      `CREATE INDEX idx_customers_document ON customers (document_number)`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX idx_customers_active ON customers (active)`,
+    );
   }
 
   async down(queryRunner: QueryRunner): Promise<void> {

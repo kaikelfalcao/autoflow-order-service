@@ -1,13 +1,13 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { randomUUID } from 'crypto';
-import { Repository } from 'typeorm';
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { randomUUID } from "crypto";
+import { Repository } from "typeorm";
 
-import { CustomerServiceClient } from '../../../../../infrastructure/http-client/customer-service.client';
-import { RequestContextService } from '../../../../../shared/logger/request-context.service';
-import { recordBusinessEvent } from '../../../../../shared/observability/business-events';
-import { OrderEventPublisher } from '../../../infrastructure/messaging/order-event-publisher';
-import { OrderOrmEntity } from '../../../infrastructure/persistence/order.orm-entity';
+import { CustomerServiceClient } from "../../../../../infrastructure/http-client/customer-service.client";
+import { RequestContextService } from "../../../../../shared/logger/request-context.service";
+import { recordBusinessEvent } from "../../../../../shared/observability/business-events";
+import { OrderEventPublisher } from "../../../infrastructure/messaging/order-event-publisher";
+import { OrderOrmEntity } from "../../../infrastructure/persistence/order.orm-entity";
 
 export interface OpenOrderInput {
   customerCpf: string;
@@ -46,8 +46,8 @@ export class OpenOrderUseCase {
       vehicleModel: input.vehicleModel,
       vehicleYear: input.vehicleYear,
       branchId: input.branchId ?? null,
-      status: 'RECEIVED',
-      totalAmount: '0.00',
+      status: "RECEIVED",
+      totalAmount: "0.00",
       notes: input.notes ?? null,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -55,12 +55,12 @@ export class OpenOrderUseCase {
 
     const saved = await this.orderRepository.save(order);
 
-    this.requestCtx.set('order_id', saved.id);
-    this.requestCtx.set('vehicle_plate', saved.vehiclePlate);
+    this.requestCtx.set("order_id", saved.id);
+    this.requestCtx.set("vehicle_plate", saved.vehiclePlate);
 
     await this.orderEventPublisher.publish({
-      eventType: 'OS_CREATED',
-      routingKey: 'order.created',
+      eventType: "OS_CREATED",
+      routingKey: "order.created",
       correlationId: saved.id,
       payload: {
         orderId: saved.id,
@@ -75,7 +75,7 @@ export class OpenOrderUseCase {
       },
     });
 
-    recordBusinessEvent('OrderCreated', {
+    recordBusinessEvent("OrderCreated", {
       orderId: saved.id,
       customerCpf: saved.customerCpf,
       branchId: saved.branchId,
@@ -88,4 +88,3 @@ export class OpenOrderUseCase {
     };
   }
 }
-

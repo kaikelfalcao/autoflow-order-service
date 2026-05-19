@@ -1,12 +1,16 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { CustomerRepository, CustomerFilters, CUSTOMER_REPOSITORY } from '../domain/ports/customer.repository';
-import { CustomerNotFoundError } from '../domain/errors/customer-not-found.error';
-import { CustomerAlreadyExistsError } from '../domain/errors/customer-already-exists.error';
-import { CustomerHasActiveVehiclesError } from '../domain/errors/customer-has-active-vehicles.error';
-import { Customer } from '../domain/customer.entity';
-import { Document } from '../domain/value-objects/document.vo';
-import { DocumentType } from '../domain/enums/document-type.enum';
-import { AppLogger } from '../../../infrastructure/observability/logger';
+import { Inject, Injectable } from "@nestjs/common";
+import {
+  CustomerRepository,
+  CustomerFilters,
+  CUSTOMER_REPOSITORY,
+} from "../domain/ports/customer.repository";
+import { CustomerNotFoundError } from "../domain/errors/customer-not-found.error";
+import { CustomerAlreadyExistsError } from "../domain/errors/customer-already-exists.error";
+import { CustomerHasActiveVehiclesError } from "../domain/errors/customer-has-active-vehicles.error";
+import { Customer } from "../domain/customer.entity";
+import { Document } from "../domain/value-objects/document.vo";
+import { DocumentType } from "../domain/enums/document-type.enum";
+import { AppLogger } from "../../../infrastructure/observability/logger";
 
 export interface CreateCustomerDto {
   documentType: DocumentType;
@@ -63,15 +67,22 @@ export class CustomerService {
   }
 
   async findByDocument(documentNumber: string): Promise<Customer> {
-    const clean = documentNumber.replace(/\D/g, '');
+    const clean = documentNumber.replace(/\D/g, "");
     const customer = await this.customerRepository.findByDocument(clean);
     if (!customer) throw new CustomerNotFoundError(documentNumber);
     return customer;
   }
 
-  async findAll(dto: ListCustomersDto): Promise<{ data: Customer[]; total: number; page: number; limit: number }> {
+  async findAll(
+    dto: ListCustomersDto,
+  ): Promise<{ data: Customer[]; total: number; page: number; limit: number }> {
     const limit = Math.min(dto.limit, 100);
-    const filters: CustomerFilters = { name: dto.name, active: dto.active, page: dto.page, limit };
+    const filters: CustomerFilters = {
+      name: dto.name,
+      active: dto.active,
+      page: dto.page,
+      limit,
+    };
     const { data, total } = await this.customerRepository.findAll(filters);
     return { data, total, page: dto.page, limit };
   }
@@ -82,7 +93,10 @@ export class CustomerService {
 
     if (dto.name) customer.updateName(dto.name);
     if (dto.email !== undefined || dto.phone !== undefined) {
-      customer.updateContact(dto.email ?? customer.email, dto.phone ?? customer.phone);
+      customer.updateContact(
+        dto.email ?? customer.email,
+        dto.phone ?? customer.phone,
+      );
     }
 
     await this.customerRepository.save(customer);
@@ -96,7 +110,10 @@ export class CustomerService {
 
     const hasVehicles = await this.customerRepository.hasActiveVehicles(id);
     if (hasVehicles) {
-      this.logger.warn(`Customer ${id} has active vehicles, cannot deactivate`, CustomerService.name);
+      this.logger.warn(
+        `Customer ${id} has active vehicles, cannot deactivate`,
+        CustomerService.name,
+      );
       throw new CustomerHasActiveVehiclesError(id);
     }
 

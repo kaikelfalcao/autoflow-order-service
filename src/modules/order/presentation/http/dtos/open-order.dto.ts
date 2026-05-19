@@ -1,4 +1,12 @@
-import { IsInt, IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength, Min } from 'class-validator';
+import {
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+  Min,
+} from "class-validator";
 
 export class OpenOrderDto {
   @IsString()
@@ -43,4 +51,3 @@ export class OpenOrderDto {
   @IsString()
   notes?: string;
 }
-

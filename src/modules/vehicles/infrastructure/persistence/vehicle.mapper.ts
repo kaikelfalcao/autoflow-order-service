@@ -1,5 +1,5 @@
-import { VehicleTypeormEntity } from './vehicle.orm-entity';
-import { Vehicle } from '../../domain/vehicle.entity';
+import { VehicleTypeormEntity } from "./vehicle.orm-entity";
+import { Vehicle } from "../../domain/vehicle.entity";
 
 export class VehicleMapper {
   static toDomain(entity: VehicleTypeormEntity): Vehicle {

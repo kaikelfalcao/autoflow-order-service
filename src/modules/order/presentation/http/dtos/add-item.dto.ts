@@ -1,8 +1,17 @@
-import { IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, Min } from 'class-validator';
+import {
+  IsEnum,
+  IsInt,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  MaxLength,
+  Min,
+} from "class-validator";
 
 export enum OrderItemTypeDtoEnum {
-  SERVICE = 'SERVICE',
-  PART = 'PART',
+  SERVICE = "SERVICE",
+  PART = "PART",
 }
 
 export class AddItemDto {

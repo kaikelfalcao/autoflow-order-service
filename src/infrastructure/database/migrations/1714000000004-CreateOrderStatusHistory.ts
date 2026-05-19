@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import { MigrationInterface, QueryRunner } from "typeorm";
 
 export class CreateOrderStatusHistory1714000000004 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -16,13 +16,14 @@ export class CreateOrderStatusHistory1714000000004 implements MigrationInterface
     `);
 
     await queryRunner.query(
-      'CREATE INDEX IF NOT EXISTS idx_order_status_history_order_id ON order_status_history (order_id)',
+      "CREATE INDEX IF NOT EXISTS idx_order_status_history_order_id ON order_status_history (order_id)",
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query('DROP INDEX IF EXISTS idx_order_status_history_order_id');
-    await queryRunner.query('DROP TABLE IF EXISTS order_status_history');
+    await queryRunner.query(
+      "DROP INDEX IF EXISTS idx_order_status_history_order_id",
+    );
+    await queryRunner.query("DROP TABLE IF EXISTS order_status_history");
   }
 }
-

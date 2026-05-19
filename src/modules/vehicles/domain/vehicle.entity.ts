@@ -1,6 +1,6 @@
-import { Entity } from '../../../shared/domain/entity';
-import { InvalidMileageError } from './errors/invalid-mileage.error';
-import { randomUUID } from 'crypto';
+import { Entity } from "../../../shared/domain/entity";
+import { InvalidMileageError } from "./errors/invalid-mileage.error";
+import { randomUUID } from "crypto";
 
 export interface CreateVehicleProps {
   customerId: string;
@@ -82,13 +82,19 @@ export class Vehicle extends Entity {
 
   updateMileage(km: number): void {
     if (km < this._mileageKm) {
-      throw new InvalidMileageError(`New mileage (${km}) cannot be less than current mileage (${this._mileageKm})`);
+      throw new InvalidMileageError(
+        `New mileage (${km}) cannot be less than current mileage (${this._mileageKm})`,
+      );
     }
     this._mileageKm = km;
     this._updatedAt = new Date();
   }
 
-  updateAttributes(props: { color?: string; brand?: string; model?: string }): void {
+  updateAttributes(props: {
+    color?: string;
+    brand?: string;
+    model?: string;
+  }): void {
     if (props.color !== undefined) this._color = props.color;
     if (props.brand !== undefined) this._brand = props.brand;
     if (props.model !== undefined) this._model = props.model;
@@ -99,15 +105,37 @@ export class Vehicle extends Entity {
     return this._customerId === customerId;
   }
 
-  get id(): string { return this._id; }
-  get customerId(): string { return this._customerId; }
-  get plate(): string { return this._plate; }
-  get brand(): string { return this._brand; }
-  get model(): string { return this._model; }
-  get year(): number { return this._year; }
-  get color(): string { return this._color; }
-  get mileageKm(): number { return this._mileageKm; }
-  get active(): boolean { return this._active; }
-  get createdAt(): Date { return this._createdAt; }
-  get updatedAt(): Date { return this._updatedAt; }
+  get id(): string {
+    return this._id;
+  }
+  get customerId(): string {
+    return this._customerId;
+  }
+  get plate(): string {
+    return this._plate;
+  }
+  get brand(): string {
+    return this._brand;
+  }
+  get model(): string {
+    return this._model;
+  }
+  get year(): number {
+    return this._year;
+  }
+  get color(): string {
+    return this._color;
+  }
+  get mileageKm(): number {
+    return this._mileageKm;
+  }
+  get active(): boolean {
+    return this._active;
+  }
+  get createdAt(): Date {
+    return this._createdAt;
+  }
+  get updatedAt(): Date {
+    return this._updatedAt;
+  }
 }

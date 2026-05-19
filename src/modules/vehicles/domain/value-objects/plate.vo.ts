@@ -1,4 +1,4 @@
-import { InvalidPlateError } from '../errors/invalid-plate.error';
+import { InvalidPlateError } from "../errors/invalid-plate.error";
 
 // Accepts: ABC-1234 (old format) and ABC-1D23 (Mercosul)
 const OLD_PLATE_REGEX = /^[A-Z]{3}[0-9]{4}$/;
@@ -8,7 +8,7 @@ export class Plate {
   readonly value: string; // normalized: ABCD1234 (no hyphen, uppercase)
 
   constructor(raw: string) {
-    const normalized = raw.toUpperCase().replace(/[-\s]/g, '');
+    const normalized = raw.toUpperCase().replace(/[-\s]/g, "");
     if (!OLD_PLATE_REGEX.test(normalized) && !MERCOSUL_REGEX.test(normalized)) {
       throw new InvalidPlateError(raw);
     }

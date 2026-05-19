@@ -25,4 +25,3 @@ export interface OrderResponseDto {
     createdAt: Date;
   }>;
 }
-

@@ -1,6 +1,6 @@
-import { Entity } from '../../../shared/domain/entity';
-import { DocumentType } from './enums/document-type.enum';
-import { randomUUID } from 'crypto';
+import { Entity } from "../../../shared/domain/entity";
+import { DocumentType } from "./enums/document-type.enum";
+import { randomUUID } from "crypto";
 
 export interface CreateCustomerProps {
   documentType: DocumentType;
@@ -87,16 +87,34 @@ export class Customer extends Entity {
   }
 
   isOwnedBy(documentNumber: string): boolean {
-    return this._documentNumber === documentNumber.replace(/\D/g, '');
+    return this._documentNumber === documentNumber.replace(/\D/g, "");
   }
 
-  get id(): string { return this._id; }
-  get documentType(): DocumentType { return this._documentType; }
-  get documentNumber(): string { return this._documentNumber; }
-  get name(): string { return this._name; }
-  get email(): string { return this._email; }
-  get phone(): string { return this._phone; }
-  get active(): boolean { return this._active; }
-  get createdAt(): Date { return this._createdAt; }
-  get updatedAt(): Date { return this._updatedAt; }
+  get id(): string {
+    return this._id;
+  }
+  get documentType(): DocumentType {
+    return this._documentType;
+  }
+  get documentNumber(): string {
+    return this._documentNumber;
+  }
+  get name(): string {
+    return this._name;
+  }
+  get email(): string {
+    return this._email;
+  }
+  get phone(): string {
+    return this._phone;
+  }
+  get active(): boolean {
+    return this._active;
+  }
+  get createdAt(): Date {
+    return this._createdAt;
+  }
+  get updatedAt(): Date {
+    return this._updatedAt;
+  }
 }

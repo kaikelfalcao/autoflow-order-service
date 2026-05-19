@@ -1,22 +1,30 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsInt, IsNotEmpty, IsOptional, IsString, IsUUID, Max, Min } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import {
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Max,
+  Min,
+} from "class-validator";
 
 export class CreateVehicleDto {
-  @ApiProperty({ example: 'uuid-of-customer' })
+  @ApiProperty({ example: "uuid-of-customer" })
   @IsUUID()
   customerId: string;
 
-  @ApiProperty({ example: 'ABC-1234' })
+  @ApiProperty({ example: "ABC-1234" })
   @IsString()
   @IsNotEmpty()
   plate: string;
 
-  @ApiProperty({ example: 'Toyota' })
+  @ApiProperty({ example: "Toyota" })
   @IsString()
   @IsNotEmpty()
   brand: string;
 
-  @ApiProperty({ example: 'Corolla' })
+  @ApiProperty({ example: "Corolla" })
   @IsString()
   @IsNotEmpty()
   model: string;
@@ -27,7 +35,7 @@ export class CreateVehicleDto {
   @Max(new Date().getFullYear() + 1)
   year: number;
 
-  @ApiProperty({ example: 'White' })
+  @ApiProperty({ example: "White" })
   @IsString()
   @IsNotEmpty()
   color: string;

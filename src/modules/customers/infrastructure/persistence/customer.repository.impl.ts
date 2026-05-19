@@ -1,11 +1,14 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { ILike, Repository } from 'typeorm';
-import { CustomerRepository, CustomerFilters } from '../../domain/ports/customer.repository';
-import { Customer } from '../../domain/customer.entity';
-import { CustomerTypeormEntity } from './customer.orm-entity';
-import { CustomerMapper } from './customer.mapper';
-import { VehicleTypeormEntity } from '../../../vehicles/infrastructure/persistence/vehicle.orm-entity';
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { ILike, Repository } from "typeorm";
+import {
+  CustomerRepository,
+  CustomerFilters,
+} from "../../domain/ports/customer.repository";
+import { Customer } from "../../domain/customer.entity";
+import { CustomerTypeormEntity } from "./customer.orm-entity";
+import { CustomerMapper } from "./customer.mapper";
+import { VehicleTypeormEntity } from "../../../vehicles/infrastructure/persistence/vehicle.orm-entity";
 
 @Injectable()
 export class CustomerRepositoryImpl implements CustomerRepository {
@@ -22,12 +25,16 @@ export class CustomerRepositoryImpl implements CustomerRepository {
   }
 
   async findByDocument(documentNumber: string): Promise<Customer | null> {
-    const clean = documentNumber.replace(/\D/g, '');
-    const entity = await this.repo.findOne({ where: { documentNumber: clean } });
+    const clean = documentNumber.replace(/\D/g, "");
+    const entity = await this.repo.findOne({
+      where: { documentNumber: clean },
+    });
     return entity ? CustomerMapper.toDomain(entity) : null;
   }
 
-  async findAll(filters: CustomerFilters): Promise<{ data: Customer[]; total: number }> {
+  async findAll(
+    filters: CustomerFilters,
+  ): Promise<{ data: Customer[]; total: number }> {
     const limit = Math.min(filters.limit, 100);
     const skip = (filters.page - 1) * limit;
 
@@ -37,7 +44,7 @@ export class CustomerRepositoryImpl implements CustomerRepository {
 
     const [entities, total] = await this.repo.findAndCount({
       where,
-      order: { createdAt: 'DESC' },
+      order: { createdAt: "DESC" },
       take: limit,
       skip,
     });
@@ -51,13 +58,15 @@ export class CustomerRepositoryImpl implements CustomerRepository {
   }
 
   async exists(documentNumber: string): Promise<boolean> {
-    const clean = documentNumber.replace(/\D/g, '');
+    const clean = documentNumber.replace(/\D/g, "");
     const count = await this.repo.count({ where: { documentNumber: clean } });
     return count > 0;
   }
 
   async hasActiveVehicles(customerId: string): Promise<boolean> {
-    const count = await this.vehicleRepo.count({ where: { customerId, active: true } });
+    const count = await this.vehicleRepo.count({
+      where: { customerId, active: true },
+    });
     return count > 0;
   }
 }

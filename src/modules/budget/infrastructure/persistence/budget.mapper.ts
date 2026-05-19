@@ -1,6 +1,6 @@
-import { BudgetOrmEntity } from './budget.orm-entity';
+import { BudgetOrmEntity } from "./budget.orm-entity";
 // Ajuste para seu domínio real:
-import { Budget } from '../../domain/budget.entity';
+import { Budget } from "../../domain/budget.entity";
 
 export class BudgetMapper {
   static toDomain(orm: BudgetOrmEntity): Budget {

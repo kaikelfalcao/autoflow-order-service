@@ -1,9 +1,9 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
-import { IsBoolean, IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { ApiPropertyOptional } from "@nestjs/swagger";
+import { Transform } from "class-transformer";
+import { IsBoolean, IsInt, IsOptional, IsString, Min } from "class-validator";
 
 export class ListCustomersQuery {
-  @ApiPropertyOptional({ example: 'João' })
+  @ApiPropertyOptional({ example: "João" })
   @IsString()
   @IsOptional()
   name?: string;
@@ -11,7 +11,7 @@ export class ListCustomersQuery {
   @ApiPropertyOptional({ example: true })
   @IsBoolean()
   @IsOptional()
-  @Transform(({ value }) => value === 'true' || value === true)
+  @Transform(({ value }) => value === "true" || value === true)
   active?: boolean;
 
   @ApiPropertyOptional({ example: 1, default: 1 })

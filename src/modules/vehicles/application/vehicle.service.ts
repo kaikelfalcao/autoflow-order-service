@@ -1,14 +1,21 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { VehicleRepository, VehicleFilters, VEHICLE_REPOSITORY } from '../domain/ports/vehicle.repository';
-import { CustomerRepository, CUSTOMER_REPOSITORY } from '../../customers/domain/ports/customer.repository';
-import { VehicleNotFoundError } from '../domain/errors/vehicle-not-found.error';
-import { VehicleAlreadyExistsError } from '../domain/errors/vehicle-already-exists.error';
-import { VehicleHasActiveOrdersError } from '../domain/errors/vehicle-has-active-orders.error';
-import { CustomerNotFoundError } from '../../customers/domain/errors/customer-not-found.error';
-import { InvalidMileageError } from '../domain/errors/invalid-mileage.error';
-import { Vehicle } from '../domain/vehicle.entity';
-import { Plate } from '../domain/value-objects/plate.vo';
-import { AppLogger } from '../../../infrastructure/observability/logger';
+import { Inject, Injectable } from "@nestjs/common";
+import {
+  VehicleRepository,
+  VehicleFilters,
+  VEHICLE_REPOSITORY,
+} from "../domain/ports/vehicle.repository";
+import {
+  CustomerRepository,
+  CUSTOMER_REPOSITORY,
+} from "../../customers/domain/ports/customer.repository";
+import { VehicleNotFoundError } from "../domain/errors/vehicle-not-found.error";
+import { VehicleAlreadyExistsError } from "../domain/errors/vehicle-already-exists.error";
+import { VehicleHasActiveOrdersError } from "../domain/errors/vehicle-has-active-orders.error";
+import { CustomerNotFoundError } from "../../customers/domain/errors/customer-not-found.error";
+import { InvalidMileageError } from "../domain/errors/invalid-mileage.error";
+import { Vehicle } from "../domain/vehicle.entity";
+import { Plate } from "../domain/value-objects/plate.vo";
+import { AppLogger } from "../../../infrastructure/observability/logger";
 
 export interface CreateVehicleDto {
   customerId: string;
@@ -73,16 +80,34 @@ export class VehicleService {
     return vehicle;
   }
 
-  async findByCustomerId(customerId: string, dto: ListVehiclesDto): Promise<{ data: Vehicle[]; total: number; page: number; limit: number }> {
+  async findByCustomerId(
+    customerId: string,
+    dto: ListVehiclesDto,
+  ): Promise<{ data: Vehicle[]; total: number; page: number; limit: number }> {
     const limit = Math.min(dto.limit, 100);
-    const filters: VehicleFilters = { customerId, active: dto.active, page: dto.page, limit };
-    const { data, total } = await this.vehicleRepository.findByCustomerId(customerId, filters);
+    const filters: VehicleFilters = {
+      customerId,
+      active: dto.active,
+      page: dto.page,
+      limit,
+    };
+    const { data, total } = await this.vehicleRepository.findByCustomerId(
+      customerId,
+      filters,
+    );
     return { data, total, page: dto.page, limit };
   }
 
-  async findAll(dto: ListVehiclesDto): Promise<{ data: Vehicle[]; total: number; page: number; limit: number }> {
+  async findAll(
+    dto: ListVehiclesDto,
+  ): Promise<{ data: Vehicle[]; total: number; page: number; limit: number }> {
     const limit = Math.min(dto.limit, 100);
-    const filters: VehicleFilters = { customerId: dto.customerId, active: dto.active, page: dto.page, limit };
+    const filters: VehicleFilters = {
+      customerId: dto.customerId,
+      active: dto.active,
+      page: dto.page,
+      limit,
+    };
     const { data, total } = await this.vehicleRepository.findAll(filters);
     return { data, total, page: dto.page, limit };
   }
@@ -93,11 +118,17 @@ export class VehicleService {
 
     if (dto.mileageKm !== undefined) {
       if (dto.mileageKm < vehicle.mileageKm) {
-        throw new InvalidMileageError(`New mileage (${dto.mileageKm}) cannot be less than current mileage (${vehicle.mileageKm})`);
+        throw new InvalidMileageError(
+          `New mileage (${dto.mileageKm}) cannot be less than current mileage (${vehicle.mileageKm})`,
+        );
       }
       vehicle.updateMileage(dto.mileageKm);
     }
-    vehicle.updateAttributes({ color: dto.color, brand: dto.brand, model: dto.model });
+    vehicle.updateAttributes({
+      color: dto.color,
+      brand: dto.brand,
+      model: dto.model,
+    });
 
     await this.vehicleRepository.save(vehicle);
     this.logger.log(`Vehicle updated: ${id}`, VehicleService.name);
@@ -110,7 +141,10 @@ export class VehicleService {
 
     const hasOrders = await this.vehicleRepository.hasActiveOrders(id);
     if (hasOrders) {
-      this.logger.warn(`Vehicle ${id} has active orders, cannot deactivate`, VehicleService.name);
+      this.logger.warn(
+        `Vehicle ${id} has active orders, cannot deactivate`,
+        VehicleService.name,
+      );
       throw new VehicleHasActiveOrdersError(id);
     }
 

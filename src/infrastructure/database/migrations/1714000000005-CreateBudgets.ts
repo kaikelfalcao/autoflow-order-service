@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import { MigrationInterface, QueryRunner } from "typeorm";
 
 export class CreateBudgets1714000000005 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -18,12 +18,13 @@ export class CreateBudgets1714000000005 implements MigrationInterface {
       )
     `);
 
-    await queryRunner.query('CREATE INDEX IF NOT EXISTS idx_budgets_order_id ON budgets (order_id)');
+    await queryRunner.query(
+      "CREATE INDEX IF NOT EXISTS idx_budgets_order_id ON budgets (order_id)",
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query('DROP INDEX IF EXISTS idx_budgets_order_id');
-    await queryRunner.query('DROP TABLE IF EXISTS budgets');
+    await queryRunner.query("DROP INDEX IF EXISTS idx_budgets_order_id");
+    await queryRunner.query("DROP TABLE IF EXISTS budgets");
   }
 }
-

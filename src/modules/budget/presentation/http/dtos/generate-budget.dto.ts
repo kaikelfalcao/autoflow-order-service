@@ -1,4 +1,4 @@
-import { IsInt, IsOptional, Max, Min } from 'class-validator';
+import { IsInt, IsOptional, Max, Min } from "class-validator";
 
 export class GenerateBudgetDto {
   @IsOptional()
@@ -12,4 +12,3 @@ export class GenerateBudgetDto {
   @Max(60)
   validDays?: number;
 }
-

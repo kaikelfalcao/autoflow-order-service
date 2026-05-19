@@ -1,6 +1,6 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
-import { IsBoolean, IsInt, IsOptional, IsUUID, Min } from 'class-validator';
+import { ApiPropertyOptional } from "@nestjs/swagger";
+import { Transform } from "class-transformer";
+import { IsBoolean, IsInt, IsOptional, IsUUID, Min } from "class-validator";
 
 export class ListVehiclesQuery {
   @ApiPropertyOptional()
@@ -11,7 +11,7 @@ export class ListVehiclesQuery {
   @ApiPropertyOptional()
   @IsBoolean()
   @IsOptional()
-  @Transform(({ value }) => value === 'true' || value === true)
+  @Transform(({ value }) => value === "true" || value === true)
   active?: boolean;
 
   @ApiPropertyOptional({ default: 1 })
