@@ -16,7 +16,9 @@ const AppDataSource = new DataSource({
   username: process.env.DATABASE_USER || "order_service",
   password: process.env.DATABASE_PASSWORD || "order_service",
   database: process.env.DATABASE_NAME || "order_service",
-  entities: [join(root, "modules/**/infrastructure/persistence/*.orm-entity.{ts,js}")],
+  entities: [
+    join(root, "modules/**/infrastructure/persistence/*.orm-entity.{ts,js}"),
+  ],
   migrations: [join(__dirname, "migrations/*.{ts,js}")],
   synchronize: false,
   logging: false,
