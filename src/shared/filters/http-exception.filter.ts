@@ -25,6 +25,22 @@ interface ErrorBody {
   path: string;
 }
 
+interface MappedError {
+  status: number;
+  error: string;
+  message: string | string[];
+}
+
+const STATUS_TEXT: Record<number, string> = {
+  400: "Bad Request",
+  401: "Unauthorized",
+  403: "Forbidden",
+  404: "Not Found",
+  409: "Conflict",
+  422: "Unprocessable Entity",
+  500: "Internal Server Error",
+};
+
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(HttpExceptionFilter.name);
@@ -33,86 +49,95 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
-    const path = request.url;
 
-    let status = HttpStatus.INTERNAL_SERVER_ERROR;
-    let message: string | string[] = "Internal server error";
-    let error = "Internal Server Error";
+    const mapped = this.mapException(exception);
 
+    const body: ErrorBody = {
+      ...mapped,
+      statusCode: mapped.status,
+      timestamp: new Date().toISOString(),
+      path: request.url,
+    };
+
+    response.status(mapped.status).json(body);
+  }
+
+  private mapException(exception: unknown): MappedError {
     if (exception instanceof HttpException) {
-      status = exception.getStatus();
-      const res = exception.getResponse();
-      if (typeof res === "string") {
-        message = res;
-      } else if (typeof res === "object" && res !== null) {
-        const body = res as Record<string, unknown>;
-        const raw = body["message"];
-        message = Array.isArray(raw)
-          ? raw.map(String)
-          : typeof raw === "string"
-            ? raw
-            : message;
-      }
-      error = this.statusToText(status);
-    } else if (
+      return this.mapHttpException(exception);
+    }
+
+    if (
       exception instanceof CustomerNotFoundError ||
       exception instanceof VehicleNotFoundError
     ) {
-      status = HttpStatus.NOT_FOUND;
-      error = "Not Found";
-      message = exception.message;
-    } else if (
+      return {
+        status: HttpStatus.NOT_FOUND,
+        error: "Not Found",
+        message: exception.message,
+      };
+    }
+
+    if (
       exception instanceof CustomerAlreadyExistsError ||
-      exception instanceof VehicleAlreadyExistsError
-    ) {
-      status = HttpStatus.CONFLICT;
-      error = "Conflict";
-      message = exception.message;
-    } else if (
+      exception instanceof VehicleAlreadyExistsError ||
       exception instanceof CustomerHasActiveVehiclesError ||
       exception instanceof VehicleHasActiveOrdersError
     ) {
-      status = HttpStatus.CONFLICT;
-      error = "Conflict";
-      message = exception.message;
-    } else if (
+      return {
+        status: HttpStatus.CONFLICT,
+        error: "Conflict",
+        message: exception.message,
+      };
+    }
+
+    if (
       exception instanceof InvalidDocumentError ||
       exception instanceof InvalidPlateError
     ) {
-      status = HttpStatus.BAD_REQUEST;
-      error = "Bad Request";
-      message = exception.message;
-    } else if (exception instanceof InvalidMileageError) {
-      status = HttpStatus.UNPROCESSABLE_ENTITY;
-      error = "Unprocessable Entity";
-      message = exception.message;
-    } else {
-      const err =
-        exception instanceof Error ? exception : new Error(String(exception));
-      this.logger.error(`Unhandled exception: ${err.message}`, err.stack);
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        error: "Bad Request",
+        message: exception.message,
+      };
     }
 
-    const body: ErrorBody = {
-      statusCode: status,
-      error,
-      message,
-      timestamp: new Date().toISOString(),
-      path,
-    };
+    if (exception instanceof InvalidMileageError) {
+      return {
+        status: HttpStatus.UNPROCESSABLE_ENTITY,
+        error: "Unprocessable Entity",
+        message: exception.message,
+      };
+    }
 
-    response.status(status).json(body);
+    // Fallback: erro inesperado — loga + 500
+    const err =
+      exception instanceof Error ? exception : new Error(String(exception));
+    this.logger.error(`Unhandled exception: ${err.message}`, err.stack);
+    return {
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
+      error: "Internal Server Error",
+      message: "Internal server error",
+    };
   }
 
-  private statusToText(status: number): string {
-    const map: Record<number, string> = {
-      400: "Bad Request",
-      401: "Unauthorized",
-      403: "Forbidden",
-      404: "Not Found",
-      409: "Conflict",
-      422: "Unprocessable Entity",
-      500: "Internal Server Error",
+  private mapHttpException(exception: HttpException): MappedError {
+    const status = exception.getStatus();
+    const res = exception.getResponse();
+    const message = this.extractHttpMessage(res);
+    return {
+      status,
+      error: STATUS_TEXT[status] ?? "Error",
+      message,
     };
-    return map[status] ?? "Error";
+  }
+
+  private extractHttpMessage(res: string | object): string | string[] {
+    if (typeof res === "string") return res;
+    if (typeof res !== "object" || res === null) return "Error";
+    const raw = (res as Record<string, unknown>)["message"];
+    if (Array.isArray(raw)) return raw.map(String);
+    if (typeof raw === "string") return raw;
+    return "Error";
   }
 }

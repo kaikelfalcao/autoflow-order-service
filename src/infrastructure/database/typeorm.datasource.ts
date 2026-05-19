@@ -3,11 +3,9 @@ import { join } from "path";
 import { DataSource } from "typeorm";
 
 // Resolve entities/migrations relativo a __dirname → funciona em src/ (ts-node) e em dist/ (js).
-// O glob {.ts,.js} cobre ambos.
-const isCompiled = __filename.endsWith(".js");
-const root = isCompiled
-  ? join(__dirname, "..", "..") // dist/infrastructure/database → dist
-  : join(__dirname, "..", ".."); // src/infrastructure/database  → src
+// Em ambos os layouts (src/infrastructure/database e dist/infrastructure/database),
+// o root do código fica 2 níveis acima. O glob {.ts,.js} cobre os dois casos.
+const root = join(__dirname, "..", "..");
 
 const AppDataSource = new DataSource({
   type: "postgres",
