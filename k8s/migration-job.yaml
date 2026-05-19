@@ -1,5 +1,5 @@
 # Roda migrations do order-service (orders, items, status_history, budgets, customers, vehicles).
-# Usa npm run migration:run porque o Dockerfile prod do order-service inclui src/ + node_modules.
+# Usa o typeorm.datasource compilado em dist/ (mesma image do app, sem ts-node).
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -14,7 +14,22 @@ spec:
       containers:
         - name: migration
           image: kaikelfalcao/autoflow-order:latest
-          command: ["npm", "run", "migration:run"]
+          command:
+            - node
+            - -e
+            - |
+              const ds = require('./dist/infrastructure/database/typeorm.datasource').default;
+              ds.initialize()
+                .then(() => ds.runMigrations())
+                .then((m) => {
+                  console.log('Migrations:', m.length);
+                  m.forEach(x => console.log(' -', x.name));
+                  process.exit(0);
+                })
+                .catch((err) => {
+                  console.error('Migration error:', err);
+                  process.exit(1);
+                });
           envFrom:
             - secretRef:
                 name: order-secrets
