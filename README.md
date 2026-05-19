@@ -175,7 +175,7 @@ npm run lint           # tsc --noEmit
 
 **Coverage:** 100% nos use-cases monitorados pelo `collectCoverageFrom` (open-order, update-status, generate/approve/reject-budget, complete-execution, get-execution-queue).
 
-> **TODO:** SonarQube Community.
+> **Análise estática:** CodeQL via GitHub Actions (`.github/workflows/codeQL.yml`) — varredura de segurança em pushes na `main` e em pull requests.
 
 ---
 
