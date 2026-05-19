@@ -62,7 +62,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "test:bdd": "cucumber-js --require-module ts-node/register --require test/bdd/steps/**/*.ts test/bdd/features/**/*.feature",
+    "test:bdd": "cucumber-js",
     "typeorm": "typeorm-ts-node-commonjs -d src/infrastructure/database/typeorm.datasource.ts",
     "migration:run": "npm run typeorm -- migration:run",
     "migration:revert": "npm run typeorm -- migration:revert",
