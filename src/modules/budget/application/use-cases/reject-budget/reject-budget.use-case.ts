@@ -1,11 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
 
-import { recordSagaCompensation } from '../../../../../infrastructure/observability/new-relic.config';
-import { OrderStatusHistoryService } from '../../../../order/application/use-cases/_shared/order-status-history.service';
-import { OrderEventPublisher } from '../../../../order/infrastructure/messaging/order-event-publisher';
-import { BudgetOrmEntity } from '../../../infrastructure/persistence/budget.orm-entity';
+import { recordSagaCompensation } from "../../../../../shared/observability/business-events";
+import { OrderStatusHistoryService } from "../../../../order/application/use-cases/_shared/order-status-history.service";
+import { OrderEventPublisher } from "../../../../order/infrastructure/messaging/order-event-publisher";
+import { BudgetOrmEntity } from "../../../infrastructure/persistence/budget.orm-entity";
 
 export interface RejectBudgetInput {
   orderId: string;
@@ -22,53 +22,55 @@ export class RejectBudgetUseCase {
   ) {}
 
   async execute(input: RejectBudgetInput) {
-    const budget = await this.budgetRepository.findOne({ where: { orderId: input.orderId } });
+    const budget = await this.budgetRepository.findOne({
+      where: { orderId: input.orderId },
+    });
     if (!budget) {
-      throw new NotFoundException('Budget not found');
+      throw new NotFoundException("Budget not found");
     }
 
-    budget.status = 'REJECTED';
+    budget.status = "REJECTED";
     budget.respondedAt = new Date();
     await this.budgetRepository.save(budget);
 
     await this.orderStatusHistoryService.transitionStatus({
       orderId: input.orderId,
-      nextStatus: 'REJECTED',
-      changedBy: 'budget:customer',
-      reason: input.reason ?? 'Budget rejected',
+      nextStatus: "REJECTED",
+      changedBy: "budget:customer",
+      reason: input.reason ?? "Budget rejected",
     });
 
     const order = await this.orderStatusHistoryService.transitionStatus({
       orderId: input.orderId,
-      nextStatus: 'CANCELLED',
-      changedBy: 'budget:system',
-      reason: input.reason ?? 'Order cancelled after budget rejection',
+      nextStatus: "CANCELLED",
+      changedBy: "budget:system",
+      reason: input.reason ?? "Order cancelled after budget rejection",
     });
 
     await this.orderEventPublisher.publish({
-      eventType: 'BUDGET_REJECTED',
-      routingKey: 'order.budget.rejected',
+      eventType: "BUDGET_REJECTED",
+      routingKey: "order.budget.rejected",
       correlationId: input.orderId,
       payload: {
         orderId: input.orderId,
-        reason: input.reason ?? 'Budget rejected',
+        reason: input.reason ?? "Budget rejected",
         rejectedAt: budget.respondedAt,
       },
     });
 
     recordSagaCompensation({
       orderId: input.orderId,
-      reason: input.reason ?? 'Budget rejected',
-      step: 'BUDGET_REJECTED',
+      reason: input.reason ?? "Budget rejected",
+      step: "BUDGET_REJECTED",
     });
 
     await this.orderEventPublisher.publish({
-      eventType: 'OS_CANCELLED',
-      routingKey: 'order.cancelled',
+      eventType: "OS_CANCELLED",
+      routingKey: "order.cancelled",
       correlationId: input.orderId,
       payload: {
         orderId: input.orderId,
-        reason: input.reason ?? 'Order cancelled after budget rejection',
+        reason: input.reason ?? "Order cancelled after budget rejection",
         cancelledAt: new Date(),
       },
     });
@@ -81,4 +83,3 @@ export class RejectBudgetUseCase {
     };
   }
 }
-

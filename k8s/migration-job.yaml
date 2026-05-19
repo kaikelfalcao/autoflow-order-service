@@ -1,21 +1,35 @@
+# Roda migrations do order-service (orders, items, status_history, budgets, customers, vehicles).
+# Usa o typeorm.datasource compilado em dist/ (mesma image do app, sem ts-node).
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: order-service-migration
-  namespace: order-service
+  name: order-migration
+  namespace: autoflow
 spec:
-  backoffLimit: 1
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 2
   template:
     spec:
       restartPolicy: Never
       containers:
         - name: migration
-          image: your-registry/order-service:latest
-          imagePullPolicy: Always
-          command: ["npm", "run", "migration:run"]
+          image: kaikelfalcao/autoflow-order:latest
+          command:
+            - node
+            - -e
+            - |
+              const ds = require('./dist/infrastructure/database/typeorm.datasource').default;
+              ds.initialize()
+                .then(() => ds.runMigrations())
+                .then((m) => {
+                  console.log('Migrations:', m.length);
+                  m.forEach(x => console.log(' -', x.name));
+                  process.exit(0);
+                })
+                .catch((err) => {
+                  console.error('Migration error:', err);
+                  process.exit(1);
+                });
           envFrom:
-            - configMapRef:
-                name: order-service-config
             - secretRef:
-                name: order-service-secret
-
+                name: order-secrets

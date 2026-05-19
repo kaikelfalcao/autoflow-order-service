@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
 
-import { BudgetOrmEntity } from '../../../infrastructure/persistence/budget.orm-entity';
+import { BudgetOrmEntity } from "../../../infrastructure/persistence/budget.orm-entity";
 
 @Injectable()
 export class GetBudgetUseCase {
@@ -14,7 +14,7 @@ export class GetBudgetUseCase {
   async execute(orderId: string) {
     const budget = await this.budgetRepository.findOne({ where: { orderId } });
     if (!budget) {
-      throw new NotFoundException('Budget not found');
+      throw new NotFoundException("Budget not found");
     }
 
     return {
@@ -30,4 +30,3 @@ export class GetBudgetUseCase {
     };
   }
 }
-

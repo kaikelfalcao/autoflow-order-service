@@ -1,8 +1,8 @@
-import { HttpModule } from '@nestjs/axios';
-import { Global, Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { HttpModule } from "@nestjs/axios";
+import { Global, Module } from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
 
-import { CustomerServiceClient } from './customer-service.client';
+import { CustomerServiceClient } from "./customer-service.client";
 
 @Global()
 @Module({
@@ -11,4 +11,3 @@ import { CustomerServiceClient } from './customer-service.client';
   exports: [CustomerServiceClient],
 })
 export class HttpClientModule {}
-

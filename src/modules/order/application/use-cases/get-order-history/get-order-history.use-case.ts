@@ -1,9 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
 
-import { OrderOrmEntity } from '../../../infrastructure/persistence/order.orm-entity';
-import { OrderStatusHistoryOrmEntity } from '../../../infrastructure/persistence/order-status-history.orm-entity';
+import { OrderOrmEntity } from "../../../infrastructure/persistence/order.orm-entity";
+import { OrderStatusHistoryOrmEntity } from "../../../infrastructure/persistence/order-status-history.orm-entity";
 
 @Injectable()
 export class GetOrderHistoryUseCase {
@@ -15,14 +15,16 @@ export class GetOrderHistoryUseCase {
   ) {}
 
   async execute(orderId: string) {
-    const orderExists = await this.orderRepository.exists({ where: { id: orderId } });
+    const orderExists = await this.orderRepository.exists({
+      where: { id: orderId },
+    });
     if (!orderExists) {
-      throw new NotFoundException('Order not found');
+      throw new NotFoundException("Order not found");
     }
 
     const history = await this.orderStatusHistoryRepository.find({
       where: { orderId },
-      order: { createdAt: 'ASC' },
+      order: { createdAt: "ASC" },
     });
 
     return history.map((item) => ({
@@ -36,4 +38,3 @@ export class GetOrderHistoryUseCase {
     }));
   }
 }
-

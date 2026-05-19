@@ -1,12 +1,12 @@
-import { ApproveBudgetUseCase } from '../../../src/modules/budget/application/use-cases/approve-budget/approve-budget.use-case';
+import { ApproveBudgetUseCase } from "../../../src/modules/budget/application/use-cases/approve-budget/approve-budget.use-case";
 
-describe('ApproveBudgetUseCase', () => {
-  it('approves budget, updates order status and publishes BUDGET_APPROVED', async () => {
+describe("ApproveBudgetUseCase", () => {
+  it("approves budget, updates order status and publishes BUDGET_APPROVED", async () => {
     const budgetRepository = {
       findOne: jest.fn(async () => ({
-        orderId: 'order-1',
-        status: 'PENDING',
-        finalAmount: '250.00',
+        orderId: "order-1",
+        status: "PENDING",
+        finalAmount: "250.00",
         respondedAt: null,
       })),
       save: jest.fn(async (payload) => payload),
@@ -15,8 +15,8 @@ describe('ApproveBudgetUseCase', () => {
     const orderStatusHistoryService = {
       transitionStatus: jest
         .fn()
-        .mockResolvedValueOnce({ id: 'order-1', status: 'APPROVED' })
-        .mockResolvedValueOnce({ id: 'order-1', status: 'IN_EXECUTION' }),
+        .mockResolvedValueOnce({ id: "order-1", status: "APPROVED" })
+        .mockResolvedValueOnce({ id: "order-1", status: "IN_EXECUTION" }),
     };
 
     const orderEventPublisher = {
@@ -27,17 +27,18 @@ describe('ApproveBudgetUseCase', () => {
       budgetRepository as any,
       orderStatusHistoryService as any,
       orderEventPublisher as any,
+      { set: jest.fn(), get: jest.fn(), snapshot: jest.fn() } as any,
     );
 
-    const result = await useCase.execute('order-1');
+    const result = await useCase.execute("order-1");
 
-    expect(result.orderStatus).toBe('IN_EXECUTION');
+    expect(result.orderStatus).toBe("IN_EXECUTION");
     expect(orderEventPublisher.publish).toHaveBeenCalledWith(
-      expect.objectContaining({ eventType: 'BUDGET_APPROVED' }),
+      expect.objectContaining({ eventType: "BUDGET_APPROVED" }),
     );
   });
 
-  it('throws when budget does not exist', async () => {
+  it("throws when budget does not exist", async () => {
     const budgetRepository = {
       findOne: jest.fn(async () => null),
       save: jest.fn(),
@@ -55,9 +56,11 @@ describe('ApproveBudgetUseCase', () => {
       budgetRepository as any,
       orderStatusHistoryService as any,
       orderEventPublisher as any,
+      { set: jest.fn(), get: jest.fn(), snapshot: jest.fn() } as any,
     );
 
-    await expect(useCase.execute('order-404')).rejects.toThrow('Budget not found');
+    await expect(useCase.execute("order-404")).rejects.toThrow(
+      "Budget not found",
+    );
   });
 });
-

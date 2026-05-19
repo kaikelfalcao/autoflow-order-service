@@ -1,18 +1,18 @@
-import { IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsEnum, IsOptional, IsString, MaxLength } from "class-validator";
 
 export enum OrderStatusDtoEnum {
-  RECEIVED = 'RECEIVED',
-  DIAGNOSIS = 'DIAGNOSIS',
-  AWAITING_APPROVAL = 'AWAITING_APPROVAL',
-  APPROVED = 'APPROVED',
-  IN_EXECUTION = 'IN_EXECUTION',
-  COMPLETED = 'COMPLETED',
-  AWAITING_PAYMENT = 'AWAITING_PAYMENT',
-  PAID = 'PAID',
-  DELIVERED = 'DELIVERED',
-  REJECTED = 'REJECTED',
-  CANCELLED = 'CANCELLED',
-  PAYMENT_FAILED = 'PAYMENT_FAILED',
+  RECEIVED = "RECEIVED",
+  DIAGNOSIS = "DIAGNOSIS",
+  AWAITING_APPROVAL = "AWAITING_APPROVAL",
+  APPROVED = "APPROVED",
+  IN_EXECUTION = "IN_EXECUTION",
+  COMPLETED = "COMPLETED",
+  AWAITING_PAYMENT = "AWAITING_PAYMENT",
+  PAID = "PAID",
+  DELIVERED = "DELIVERED",
+  REJECTED = "REJECTED",
+  CANCELLED = "CANCELLED",
+  PAYMENT_FAILED = "PAYMENT_FAILED",
 }
 
 export class UpdateOrderStatusDto {
@@ -28,4 +28,3 @@ export class UpdateOrderStatusDto {
   @IsString()
   reason?: string;
 }
-

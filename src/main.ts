@@ -1,21 +1,23 @@
-import 'reflect-metadata';
-import { writeFileSync } from 'fs';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+require("newrelic");
+import "reflect-metadata";
 
-import { ValidationPipe } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ValidationPipe } from "@nestjs/common";
+import { NestFactory } from "@nestjs/core";
+import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import { WINSTON_MODULE_NEST_PROVIDER } from "nest-winston";
 
-import { AppModule } from './app.module';
-import { AppLogger } from './infrastructure/observability/logger';
-import { TracingService } from './infrastructure/observability/tracing.service';
+import { AppModule } from "./app.module";
+import { HttpExceptionFilter } from "./shared/filters/http-exception.filter";
+import { TracingService } from "./infrastructure/observability/tracing.service";
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
   const tracingService = app.get(TracingService);
-  const appLogger = app.get(AppLogger);
 
   app.use(tracingService.middleware());
-  app.useLogger(appLogger);
+  app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -26,19 +28,19 @@ async function bootstrap(): Promise<void> {
   );
 
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('Order Service API')
-    .setDescription('API de ciclo de vida de ordem de servico, catalogo, budget e execucao')
-    .setVersion('1.0.0')
+    .setTitle("Order Service API")
+    .setDescription(
+      "API de ciclo de vida de ordem de serviço, catálogo, budget e execução",
+    )
+    .setVersion("1.0.0")
     .build();
 
   const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('docs', app, swaggerDocument);
+  SwaggerModule.setup("api/docs", app, swaggerDocument);
 
-  // Mantem um snapshot simples da especificacao para referencia no README.
-  writeFileSync('swagger.json', JSON.stringify(swaggerDocument, null, 2));
-
-  await app.listen(process.env.APP_PORT ? Number(process.env.APP_PORT) : 3001);
+  // PORT é a env padronizada; APP_PORT mantido como fallback para compat
+  const port = Number(process.env.PORT ?? process.env.APP_PORT ?? 3001);
+  await app.listen(port);
 }
 
-bootstrap();
-
+void bootstrap();

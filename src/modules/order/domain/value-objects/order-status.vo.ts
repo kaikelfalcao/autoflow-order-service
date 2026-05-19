@@ -1,44 +1,44 @@
 export type OrderStatus =
-  | 'RECEIVED'
-  | 'DIAGNOSIS'
-  | 'AWAITING_APPROVAL'
-  | 'APPROVED'
-  | 'IN_EXECUTION'
-  | 'COMPLETED'
-  | 'AWAITING_PAYMENT'
-  | 'PAID'
-  | 'DELIVERED'
-  | 'REJECTED'
-  | 'CANCELLED'
-  | 'PAYMENT_FAILED';
+  | "RECEIVED"
+  | "DIAGNOSIS"
+  | "AWAITING_APPROVAL"
+  | "APPROVED"
+  | "IN_EXECUTION"
+  | "COMPLETED"
+  | "AWAITING_PAYMENT"
+  | "PAID"
+  | "DELIVERED"
+  | "REJECTED"
+  | "CANCELLED"
+  | "PAYMENT_FAILED";
 
 export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
-  RECEIVED: 'Recebida',
-  DIAGNOSIS: 'Em diagnostico',
-  AWAITING_APPROVAL: 'Aguardando aprovacao',
-  APPROVED: 'Aprovada',
-  IN_EXECUTION: 'Em execucao',
-  COMPLETED: 'Concluida',
-  AWAITING_PAYMENT: 'Aguardando pagamento',
-  PAID: 'Paga',
-  DELIVERED: 'Entregue',
-  REJECTED: 'Rejeitada',
-  CANCELLED: 'Cancelada',
-  PAYMENT_FAILED: 'Falha no pagamento',
+  RECEIVED: "Recebida",
+  DIAGNOSIS: "Em diagnostico",
+  AWAITING_APPROVAL: "Aguardando aprovacao",
+  APPROVED: "Aprovada",
+  IN_EXECUTION: "Em execucao",
+  COMPLETED: "Concluida",
+  AWAITING_PAYMENT: "Aguardando pagamento",
+  PAID: "Paga",
+  DELIVERED: "Entregue",
+  REJECTED: "Rejeitada",
+  CANCELLED: "Cancelada",
+  PAYMENT_FAILED: "Falha no pagamento",
 };
 
 export const VALID_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
-  RECEIVED: ['DIAGNOSIS'],
-  DIAGNOSIS: ['AWAITING_APPROVAL'],
-  AWAITING_APPROVAL: ['APPROVED', 'REJECTED'],
-  APPROVED: ['IN_EXECUTION'],
-  IN_EXECUTION: ['COMPLETED'],
-  COMPLETED: ['AWAITING_PAYMENT'],
-  AWAITING_PAYMENT: ['PAID', 'PAYMENT_FAILED'],
-  PAYMENT_FAILED: ['AWAITING_PAYMENT'],
-  PAID: ['DELIVERED'],
+  RECEIVED: ["DIAGNOSIS", "CANCELLED"],
+  DIAGNOSIS: ["AWAITING_APPROVAL", "CANCELLED"],
+  AWAITING_APPROVAL: ["APPROVED", "REJECTED", "CANCELLED"],
+  APPROVED: ["IN_EXECUTION", "CANCELLED"],
+  IN_EXECUTION: ["COMPLETED", "CANCELLED"],
+  COMPLETED: ["AWAITING_PAYMENT"],
+  AWAITING_PAYMENT: ["PAID", "PAYMENT_FAILED"],
+  PAYMENT_FAILED: ["AWAITING_PAYMENT"],
+  PAID: ["DELIVERED"],
   DELIVERED: [],
-  REJECTED: ['CANCELLED'],
+  REJECTED: ["CANCELLED"],
   CANCELLED: [],
 };
 
@@ -49,7 +49,10 @@ export function canTransitionStatus(
   return VALID_STATUS_TRANSITIONS[from].includes(to);
 }
 
-export function assertValidTransition(from: OrderStatus, to: OrderStatus): void {
+export function assertValidTransition(
+  from: OrderStatus,
+  to: OrderStatus,
+): void {
   if (!canTransitionStatus(from, to)) {
     throw new Error(`Invalid status transition: ${from} -> ${to}`);
   }

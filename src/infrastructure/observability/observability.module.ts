@@ -1,7 +1,7 @@
-import { Global, Module } from '@nestjs/common';
+import { Global, Module } from "@nestjs/common";
 
-import { AppLogger } from './logger';
-import { TracingService } from './tracing.service';
+import { AppLogger } from "./logger";
+import { TracingService } from "./tracing.service";
 
 @Global()
 @Module({
@@ -9,4 +9,3 @@ import { TracingService } from './tracing.service';
   exports: [TracingService, AppLogger],
 })
 export class ObservabilityModule {}
-

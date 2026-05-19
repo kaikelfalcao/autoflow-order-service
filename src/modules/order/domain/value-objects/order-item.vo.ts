@@ -1,4 +1,4 @@
-export type OrderItemType = 'SERVICE' | 'PART';
+export type OrderItemType = "SERVICE" | "PART";
 
 export interface OrderItemProps {
   itemId: string;
@@ -13,16 +13,16 @@ export class OrderItem {
 
   static create(props: OrderItemProps): OrderItem {
     if (!props.itemId?.trim()) {
-      throw new Error('Order itemId is required');
+      throw new Error("Order itemId is required");
     }
     if (!props.name?.trim()) {
-      throw new Error('Order item name is required');
+      throw new Error("Order item name is required");
     }
     if (props.quantity <= 0) {
-      throw new Error('Order item quantity must be positive');
+      throw new Error("Order item quantity must be positive");
     }
     if (props.unitPrice < 0) {
-      throw new Error('Order item unitPrice must be non-negative');
+      throw new Error("Order item unitPrice must be non-negative");
     }
 
     return new OrderItem({ ...props });

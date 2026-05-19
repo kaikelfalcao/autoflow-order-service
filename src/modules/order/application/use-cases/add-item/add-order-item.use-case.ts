@@ -1,14 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { randomUUID } from 'crypto';
-import { Repository } from 'typeorm';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { randomUUID } from "crypto";
+import { Repository } from "typeorm";
 
-import { OrderItemOrmEntity } from '../../../infrastructure/persistence/order-item.orm-entity';
-import { OrderOrmEntity } from '../../../infrastructure/persistence/order.orm-entity';
+import { OrderItemOrmEntity } from "../../../infrastructure/persistence/order-item.orm-entity";
+import { OrderOrmEntity } from "../../../infrastructure/persistence/order.orm-entity";
 
 export interface AddOrderItemInput {
   orderId: string;
-  itemType: 'SERVICE' | 'PART';
+  itemType: "SERVICE" | "PART";
   catalogItemId: string;
   name: string;
   unitPrice: number;
@@ -25,9 +25,11 @@ export class AddOrderItemUseCase {
   ) {}
 
   async execute(input: AddOrderItemInput) {
-    const order = await this.orderRepository.findOne({ where: { id: input.orderId } });
+    const order = await this.orderRepository.findOne({
+      where: { id: input.orderId },
+    });
     if (!order) {
-      throw new NotFoundException('Order not found');
+      throw new NotFoundException("Order not found");
     }
 
     const quantity = input.quantity ?? 1;
@@ -47,8 +49,13 @@ export class AddOrderItemUseCase {
 
     await this.orderItemRepository.save(item);
 
-    const items = await this.orderItemRepository.find({ where: { orderId: order.id } });
-    const totalAmount = items.reduce((sum, currentItem) => sum + Number(currentItem.subtotal), 0);
+    const items = await this.orderItemRepository.find({
+      where: { orderId: order.id },
+    });
+    const totalAmount = items.reduce(
+      (sum, currentItem) => sum + Number(currentItem.subtotal),
+      0,
+    );
 
     order.totalAmount = totalAmount.toFixed(2);
     order.updatedAt = new Date();
@@ -61,4 +68,3 @@ export class AddOrderItemUseCase {
     };
   }
 }
-

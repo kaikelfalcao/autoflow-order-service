@@ -1,7 +1,7 @@
-import { OrderOrmEntity } from './order.orm-entity';
+import { OrderOrmEntity } from "./order.orm-entity";
 // Ajuste estes imports para seus nomes reais de domínio:
-import { Order } from '../../domain/order.entity';
-import { OrderId } from '../../domain/value-objects/order-id.vo';
+import { Order } from "../../domain/order.entity";
+import { OrderId } from "../../domain/value-objects/order-id.vo";
 
 export class OrderMapper {
   static toDomain(orm: OrderOrmEntity): Order {
@@ -14,7 +14,7 @@ export class OrderMapper {
       vehicleBrand: orm.vehicleBrand,
       vehicleModel: orm.vehicleModel,
       vehicleYear: orm.vehicleYear,
-      branchId: orm.branchId ?? '',
+      branchId: orm.branchId ?? "",
       status: orm.status as any,
       items: (orm.items ?? []).map((item) => ({
         itemId: item.catalogItemId,
@@ -52,6 +52,6 @@ export class OrderMapper {
   }
 
   static toOrderId(id: string): OrderId {
-    return OrderId.fromString(id) as OrderId;
+    return OrderId.fromString(id);
   }
 }

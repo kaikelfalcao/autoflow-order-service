@@ -1,24 +1,33 @@
-FROM node:20-alpine AS builder
+# syntax=docker/dockerfile:1.7
+# Template padronizado autoflow (Node 24 + Alpine, multi-stage, USER node, HEALTHCHECK)
+
+# ─── builder ───
+FROM node:24-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM node:20-alpine AS production
+# ─── runner ───
+FROM node:24-alpine AS runner
 WORKDIR /app
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/src ./src
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/tsconfig.json ./tsconfig.json
-COPY --from=builder /app/tsconfig.build.json ./tsconfig.build.json
-ENV NEW_RELIC_NO_CONFIG_FILE=true
-ENV NEW_RELIC_DISTRIBUTED_TRACING_ENABLED=true
-ENV NEW_RELIC_LOG=stdout
-
 ENV NODE_ENV=production
-ENV APP_PORT=3001
-EXPOSE 3001
-CMD ["node", "dist/main.js"]
+ENV PORT=3001
 
+# Apenas deps de prod
+COPY package*.json ./
+RUN npm ci --omit=dev && npm cache clean --force
+
+# Build + agente NR
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/newrelic.js ./newrelic.js
+
+EXPOSE 3001
+
+# Healthcheck via /health (cada serviço expõe esse endpoint)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD wget -qO- "http://localhost:3001/health" >/dev/null 2>&1 || exit 1
+
+USER node
+CMD ["node", "dist/main.js"]

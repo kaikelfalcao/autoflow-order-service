@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
 
-import { OrderOrmEntity } from '../../../infrastructure/persistence/order.orm-entity';
-import { toOrderOutput } from '../_shared/order-output.mapper';
+import { OrderOrmEntity } from "../../../infrastructure/persistence/order.orm-entity";
+import { toOrderOutput } from "../_shared/order-output.mapper";
 
 export interface ListOrdersInput {
   includeClosed?: boolean;
@@ -18,13 +18,13 @@ export class ListOrdersUseCase {
   ) {}
 
   async execute(input: ListOrdersInput = {}) {
-    const query = this.orderRepository.createQueryBuilder('orders');
+    const query = this.orderRepository.createQueryBuilder("orders");
 
     if (input.status) {
-      query.where('orders.status = :status', { status: input.status });
+      query.where("orders.status = :status", { status: input.status });
     } else if (!input.includeClosed) {
-      query.where('orders.status NOT IN (:...closedStatuses)', {
-        closedStatuses: ['COMPLETED', 'PAID', 'DELIVERED'],
+      query.where("orders.status NOT IN (:...closedStatuses)", {
+        closedStatuses: ["COMPLETED", "PAID", "DELIVERED"],
       });
     }
 
@@ -36,14 +36,13 @@ export class ListOrdersUseCase {
          WHEN orders.status = 'RECEIVED' THEN 4
          ELSE 5
        END`,
-      'ASC',
+      "ASC",
     );
 
-    query.addOrderBy('orders.created_at', 'ASC');
+    query.addOrderBy("orders.created_at", "ASC");
 
     const orders = await query.getMany();
 
     return orders.map(toOrderOutput);
   }
 }
-

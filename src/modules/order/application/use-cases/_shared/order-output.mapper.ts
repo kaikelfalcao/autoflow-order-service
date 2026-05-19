@@ -1,5 +1,5 @@
-import { OrderItemOrmEntity } from '../../../infrastructure/persistence/order-item.orm-entity';
-import { OrderOrmEntity } from '../../../infrastructure/persistence/order.orm-entity';
+import { OrderItemOrmEntity } from "../../../infrastructure/persistence/order-item.orm-entity";
+import { OrderOrmEntity } from "../../../infrastructure/persistence/order.orm-entity";
 
 export function toOrderOutput(order: OrderOrmEntity) {
   return {
@@ -33,4 +33,3 @@ export function toOrderItemOutput(item: OrderItemOrmEntity) {
     createdAt: item.createdAt,
   };
 }
-

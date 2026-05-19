@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable } from "@nestjs/common";
 
-import { OrderStatus } from '../../../../order/domain/value-objects/order-status.vo';
-import { OrderStatusHistoryService } from '../../../../order/application/use-cases/_shared/order-status-history.service';
+import { OrderStatus } from "../../../../order/domain/value-objects/order-status.vo";
+import { OrderStatusHistoryService } from "../../../../order/application/use-cases/_shared/order-status-history.service";
 
 export interface UpdateExecutionStageInput {
   orderId: string;
@@ -11,13 +11,15 @@ export interface UpdateExecutionStageInput {
 
 @Injectable()
 export class UpdateExecutionStageUseCase {
-  constructor(private readonly orderStatusHistoryService: OrderStatusHistoryService) {}
+  constructor(
+    private readonly orderStatusHistoryService: OrderStatusHistoryService,
+  ) {}
 
   async execute(input: UpdateExecutionStageInput) {
     const order = await this.orderStatusHistoryService.transitionStatus({
       orderId: input.orderId,
       nextStatus: input.stage,
-      changedBy: 'execution:mechanic',
+      changedBy: "execution:mechanic",
       reason: input.notes,
     });
 
@@ -28,4 +30,3 @@ export class UpdateExecutionStageUseCase {
     };
   }
 }
-

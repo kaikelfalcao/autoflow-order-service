@@ -4,7 +4,7 @@ export interface BudgetProps {
   totalAmount: number;
   discount: number;
   finalAmount: number;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  status: "PENDING" | "APPROVED" | "REJECTED";
   sentAt: Date;
   respondedAt: Date | null;
   validUntil: Date;

@@ -1,7 +1,7 @@
 export class Money {
   private constructor(private readonly _cents: number) {
     if (!Number.isInteger(_cents) || _cents < 0) {
-      throw new Error('Money cents must be a non-negative integer');
+      throw new Error("Money cents must be a non-negative integer");
     }
   }
 
@@ -21,4 +21,3 @@ export class Money {
     return this._cents / 100;
   }
 }
-

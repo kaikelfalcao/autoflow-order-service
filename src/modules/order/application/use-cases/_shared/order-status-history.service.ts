@@ -1,12 +1,19 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { randomUUID } from 'crypto';
-import { Repository } from 'typeorm';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { randomUUID } from "crypto";
+import { Repository } from "typeorm";
 
-import { canTransitionStatus, OrderStatus } from '../../../domain/value-objects/order-status.vo';
-import { OrderEventPublisher } from '../../../infrastructure/messaging/order-event-publisher';
-import { OrderOrmEntity } from '../../../infrastructure/persistence/order.orm-entity';
-import { OrderStatusHistoryOrmEntity } from '../../../infrastructure/persistence/order-status-history.orm-entity';
+import {
+  canTransitionStatus,
+  OrderStatus,
+} from "../../../domain/value-objects/order-status.vo";
+import { OrderEventPublisher } from "../../../infrastructure/messaging/order-event-publisher";
+import { OrderOrmEntity } from "../../../infrastructure/persistence/order.orm-entity";
+import { OrderStatusHistoryOrmEntity } from "../../../infrastructure/persistence/order-status-history.orm-entity";
 
 @Injectable()
 export class OrderStatusHistoryService {
@@ -24,9 +31,11 @@ export class OrderStatusHistoryService {
     changedBy: string;
     reason?: string | null;
   }): Promise<OrderOrmEntity> {
-    const order = await this.orderRepository.findOne({ where: { id: params.orderId } });
+    const order = await this.orderRepository.findOne({
+      where: { id: params.orderId },
+    });
     if (!order) {
-      throw new NotFoundException('Order not found');
+      throw new NotFoundException("Order not found");
     }
 
     if (!canTransitionStatus(order.status as OrderStatus, params.nextStatus)) {
@@ -54,8 +63,8 @@ export class OrderStatusHistoryService {
     await this.orderStatusHistoryRepository.save(history);
 
     await this.orderEventPublisher.publish({
-      eventType: 'OS_STATUS_CHANGED',
-      routingKey: 'order.status.changed',
+      eventType: "OS_STATUS_CHANGED",
+      routingKey: "order.status.changed",
       correlationId: order.id,
       payload: {
         orderId: order.id,
@@ -69,4 +78,3 @@ export class OrderStatusHistoryService {
     return order;
   }
 }
-

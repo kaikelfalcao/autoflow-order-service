@@ -1,9 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
 
-import { OrderOrmEntity } from '../../../infrastructure/persistence/order.orm-entity';
-import { toOrderItemOutput, toOrderOutput } from '../_shared/order-output.mapper';
+import { OrderOrmEntity } from "../../../infrastructure/persistence/order.orm-entity";
+import {
+  toOrderItemOutput,
+  toOrderOutput,
+} from "../_shared/order-output.mapper";
 
 @Injectable()
 export class GetOrderUseCase {
@@ -15,11 +18,11 @@ export class GetOrderUseCase {
   async execute(orderId: string) {
     const order = await this.orderRepository.findOne({
       where: { id: orderId },
-      relations: ['items'],
+      relations: ["items"],
     });
 
     if (!order) {
-      throw new NotFoundException('Order not found');
+      throw new NotFoundException("Order not found");
     }
 
     return {
@@ -28,4 +31,3 @@ export class GetOrderUseCase {
     };
   }
 }
-
